@@ -1,5 +1,5 @@
 import unittest
-from utils.graph_generator import generate_graph
+from src.utils.graph_generator import generate_graph
 
 class TestGraphGenerator(unittest.TestCase):
 

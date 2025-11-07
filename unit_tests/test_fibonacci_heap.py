@@ -1,5 +1,5 @@
 import unittest
-from data_structures.fibonacci_heap import FibonacciHeap
+from src.data_structures.fibonacci_heap import FibonacciHeap
 
 class TestFibonacciHeap(unittest.TestCase):
 

@@ -1,5 +1,5 @@
 import unittest
-from data_structures.binary_heap import BinaryHeap
+from src.data_structures.binary_heap import BinaryHeap
 
 class TestBinaryHeap(unittest.TestCase):
 

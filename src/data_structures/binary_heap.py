@@ -14,7 +14,7 @@ Notes
 - `decrease_key` only lowers priority; higher values are ignored.
 - Internally stores items in an array and keeps a node->index map
   so we can do O(log n) sifts for both insert and decrease-key.
-"""
+  """
 
 from typing import Any, List, Tuple, Dict, Optional
 
