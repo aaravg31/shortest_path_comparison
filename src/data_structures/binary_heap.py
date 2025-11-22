@@ -76,6 +76,10 @@ class BinaryHeap:
     # LEN
     def __len__(self) -> int:
         return len(self._heap)
+    
+    # CONTAINS
+    def __contains__(self, node: Any) -> bool:
+        return node in self._pos
 
     # INTERNAL UTILITIES
     def _parent(self, i: int) -> int:

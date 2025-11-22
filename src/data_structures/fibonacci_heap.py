@@ -96,6 +96,10 @@ class FibonacciHeap:
     # LEN
     def __len__(self) -> int:
         return self.count
+    
+    # CONTAINS
+    def __contains__(self, node: Any) -> bool:
+        return node in self.nodes
 
     # INTERNAL UTILITIES
     def _merge_with_root_list(self, node: FibNode) -> None:
