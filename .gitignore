@@ -69,3 +69,6 @@ dmypy.json
 # macOS Finder metadata
 .DS_Store
 */.DS_Store
+
+# assignment
+assignment.pdf
