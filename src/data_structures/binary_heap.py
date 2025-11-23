@@ -35,6 +35,13 @@ class BinaryHeap:
         self._pos[node] = idx
         self._sift_up(idx)
 
+    # PEEK
+    def peek(self) -> Tuple[Optional[Any], Optional[float]]:
+        """Return the (node, priority) with smallest priority without removing it."""
+        if not self._heap:
+            return None, None
+        return self._heap[0]
+
     # EXTRACT MIN
     def extract_min(self) -> Tuple[Optional[Any], Optional[float]]:
         """Remove and return the (node, priority) with smallest priority."""
