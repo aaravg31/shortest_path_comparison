@@ -18,7 +18,7 @@ Notes
 """
 
 import math
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 
 class FibNode:
@@ -49,6 +49,13 @@ class FibonacciHeap:
             self.min = new_node
         self.nodes[node] = new_node
         self.count += 1
+
+    # PEEK
+    def peek(self) -> Tuple[Optional[Any], Optional[float]]:
+        """Return the (node, priority) with smallest priority without removing it."""
+        if self.min is None:
+            return None, None
+        return self.min.node, self.min.key
 
     # EXTRACT MIN
     def extract_min(self):
