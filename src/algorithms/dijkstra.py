@@ -25,29 +25,31 @@ from src.data_structures.fibonacci_heap import FibonacciHeap
 from src.data_structures.radix_heap import RadixHeap
 
 
-def dijkstra(graph, source, heap_type="binary"):
-    # Initialize heap based on type
+def dijkstra(graph, source, heap_type: str = "binary"):
+    # --- choose heap implementation ---
     if heap_type == "binary":
         heap = BinaryHeap()
     elif heap_type == "fibonacci":
         heap = FibonacciHeap()
     elif heap_type == "radix":
-        max_edge = 0
-        for u in graph:
-            for _, w in graph[u]:
-                max_edge += w  # sum upper bound
-        if max_edge == 0:
-            max_edge = 1
-
-        heap = RadixHeap(max_key=max_edge)
+        # use an upper bound on distances: max_weight * (num_nodes - 1)
+        max_w = 0
+        for u, nbrs in graph.items():
+            for _, w in nbrs:
+                if w > max_w:
+                    max_w = w
+        if max_w == 0:
+            max_w = 1
+        max_key = max_w * max(len(graph) - 1, 1)
+        heap = RadixHeap(max_key=max_key)
     else:
-        raise ValueError("heap_type must be one of {'binary', 'pairing', 'fibonacci'}")
+        raise ValueError("heap_type must be one of {'binary', 'radix', 'fibonacci'}")
 
-    # Initialize distances
+    # --- initialize distances ---
     dist = {v: math.inf for v in graph}
     dist[source] = 0
 
-    # Insert source
+    # push source
     heap.insert(source, 0)
 
     while not heap.is_empty():
@@ -55,20 +57,15 @@ def dijkstra(graph, source, heap_type="binary"):
         if u is None:
             continue
         if d > dist[u]:
-            continue  # Skip outdated entries
+            continue  # stale entry
 
         for v, w in graph.get(u, []):
             alt = dist[u] + w
             if alt < dist[v]:
                 dist[v] = alt
 
-                # Check if node already exists in heap for decrease-key
-                if (hasattr(heap, "nodes") and v in heap.nodes
-                ) or (
-                    hasattr(heap, "_pos") and v in heap._pos
-                ) or (
-                    isinstance(heap, RadixHeap) and v in heap._node_map
-                ):
+                #Unified membership check via __contains__
+                if v in heap:
                     heap.decrease_key(v, alt)
                 else:
                     heap.insert(v, alt)
