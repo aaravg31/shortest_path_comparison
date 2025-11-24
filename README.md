@@ -58,8 +58,33 @@ shortest_path_comparison/
 - **Graph Generation**: Basic random graph generator included.
 - **Benchmarking**: Initial pipeline established for comparing heap performance.
 
-## Future Work
+## Visualization
 
-- **Optimization**: Further optimize Radix Heap for large-scale graphs.
-- **Advanced Generation**: Implement scale-free and geometric graph generators for more realistic benchmarks.
-- **Analysis**: Conduct comprehensive performance analysis comparing all algorithms and data structures for the final report.
+An interactive Pygame-based visualization is included to demonstrate the algorithms on a grid. The user is able to create a grid of nodes (potential paths) and walls, and then run each algorithm to find the shortest path between the start and end nodes. The red nodes represent those that have been visited by the algorithm once it has run. 
+
+_Note:_ the Contraction Hierarchies approach must preprocess the graph before running the query to find the shortest path. In this case, the red nodes will appear very sparse, as the algorithm only visits a small number of nodes to find the shortest path once the preprocessing has determined the shortcuts. The gold lines represent the shortcuts that were used to find the final shortest path.
+
+### Setup
+1. Install the visualization dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Running
+Run the visualization module:
+```bash
+python -m src.visualization.main
+```
+
+### Controls
+- **Left Click**: Place Start (Orange), End (Turquoise), or Walls (Black).
+- **Right Click**: Remove items.
+- **1**: Select Dijkstra's Algorithm.
+- **2**: Select Bidirectional Dijkstra.
+- **3**: Select Contraction Hierarchies.
+- **SPACE**: Run the selected algorithm.
+- **R**: Reset path (keep walls).
+- **C**: Clear board.
+
+## License
+This project is licensed under the MIT License.
