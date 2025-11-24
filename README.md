@@ -13,7 +13,11 @@ The primary objectives are:
 2.  **Algorithmic Variants**: Implement and evaluate Bidirectional Dijkstra (with skewness) and Contraction Hierarchies as speed-up techniques.
 3.  **Benchmarking**: Measure runtime performance on large, randomly generated graphs to validate theoretical complexity differences.
 
-The final report with all subsequent details can be found at [/latex/final_report.pdf](/latex/final_report.pdf)
+## Supplemental Material
+
+The final report with further analysis and implementation details can be found at [/latex/final_report.pdf](/latex/final_report.pdf).
+
+Our presentation can be found at ???
 
 ## Repository Structure
 
