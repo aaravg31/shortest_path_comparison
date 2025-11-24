@@ -1,15 +1,20 @@
 import pygame
 import math
+import time
 from src.visualization.grid import Grid
 from src.visualization.visual_algorithms import (
     dijkstra_visual,
     bidirectional_dijkstra_visual,
     contraction_hierarchy_visual
 )
+# Import non-visual versions for timing
+from src.algorithms.dijkstra import dijkstra
+from src.algorithms.bidirectional_skewed import BidirectionalDijkstra
+from src.algorithms.contraction_hierarchy import ContractionHierarchy
 
 # Window setup
-ROWS = 30 # dimension of N x N grid
-WIDTH = math.floor(800/30) * ROWS # Create the window around 800 pixels wide
+ROWS = 50 # dimension of N x N grid
+WIDTH = math.floor(1000/ROWS) * ROWS # Create the window rougly 1000 pixels wide
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("Shortest Path Visualization")
 
@@ -107,12 +112,37 @@ def main():
                     
                     grid.clear_path()
                     
+                    # Run non-visual version for timing
+                    print(f"\nRunning {current_algo_name}...")
+                    start_time = time.perf_counter()
+                    
                     if current_algo_name == "Dijkstra":
+                        distances = dijkstra(graph, start_pos, heap_type="binary")
+                        elapsed_time = time.perf_counter() - start_time
+                        print(f"Dijkstra completed in {elapsed_time*1000:.2f} ms")
                         algorithm_generator = dijkstra_visual(graph, start_pos, end_pos)
+                        
                     elif current_algo_name == "Bidirectional":
+                        bi_dijkstra = BidirectionalDijkstra(graph, heap_type="binary")
+                        distance = bi_dijkstra.find_shortest_path(start_pos, end_pos)
+                        elapsed_time = time.perf_counter() - start_time
+                        print(f"Bidirectional Dijkstra completed in {elapsed_time*1000:.2f} ms")
                         algorithm_generator = bidirectional_dijkstra_visual(graph, start_pos, end_pos)
+                        
                     elif current_algo_name == "Contraction Hierarchy":
                         print("Preprocessing CH...")
+                        ch = ContractionHierarchy(graph)
+                        ch.preprocess()
+                        preprocess_time = time.perf_counter() - start_time
+                        
+                        query_start = time.perf_counter()
+                        distance = ch.query(start_pos, end_pos)
+                        query_time = time.perf_counter() - query_start
+                        
+                        print(f"CH Preprocessing: {preprocess_time*1000:.2f} ms")
+                        print(f"CH Query: {query_time*1000:.2f} ms")
+                        print(f"CH Total: {(preprocess_time + query_time)*1000:.2f} ms")
+                        
                         algorithm_generator = contraction_hierarchy_visual(graph, start_pos, end_pos)
                         
                     started = True
