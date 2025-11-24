@@ -48,7 +48,7 @@ def main():
             if node:
                 node.make_barrier()
         
-        print(f"Loaded preset 50x50 maze with {len(preset['walls'])} walls")
+        print(f"Loaded preset 50x50 maze")
 
     run = True
     started = False
@@ -93,6 +93,7 @@ def main():
                         node = grid.get_node(r, c)
                         if not node.is_start() and not node.is_end():
                             node.make_path()
+                    print(f"Shortest path found using {len(path)} nodes")
                     started = False # Finished
                     
             except StopIteration:
