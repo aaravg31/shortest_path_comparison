@@ -1,7 +1,8 @@
 # Shortest Path Comparison
 
-Cosc 520 — Advanced Algorithms
-Final Project: Performance comparison of shortest-path algorithms and priority queue data structures
+Final Project for COCS 520: Advanced Algorithms
+
+Comprehensive analysis and comparison of **shortest-path** algorithms and priority queue data structures.
 
 ## Project Overview
 
