@@ -150,6 +150,18 @@ class Grid:
             for node in row:
                 if not (node.is_start() or node.is_end() or node.is_barrier()):
                     node.reset()
+    
+    def generate_random_walls(self, density=0.25):
+        """
+        Generate random walls on the grid to showcase the algorithms
+        density: percentage of cells to make into walls (0.0 to 1.0)
+        """
+        import random
+        for row in self.grid:
+            for node in row:
+                if not (node.is_start() or node.is_end() or node.is_barrier()):
+                    if random.random() < density:
+                        node.make_barrier()
 
     def to_adjacency_dict(self) -> Dict[Any, List[Tuple[Any, float]]]:
         """

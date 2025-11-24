@@ -1,5 +1,5 @@
 import pygame
-import sys
+import math
 from src.visualization.grid import Grid
 from src.visualization.visual_algorithms import (
     dijkstra_visual,
@@ -8,12 +8,12 @@ from src.visualization.visual_algorithms import (
 )
 
 # Window setup
-WIDTH = 800
+ROWS = 30 # dimension of N x N grid
+WIDTH = math.floor(800/30) * ROWS # Create the window around 800 pixels wide
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
 pygame.display.set_caption("Shortest Path Visualization")
 
 def main():
-    ROWS = 20
     grid = Grid(ROWS, WIDTH)
 
     start = None
@@ -142,6 +142,10 @@ def main():
                     current_algo_name = "Contraction Hierarchy"
                     print("Selected: Contraction Hierarchy")
                     pygame.display.set_caption(f"Shortest Path Visualization - {current_algo_name}")
+                
+                if event.key == pygame.K_BACKQUOTE:  # Backtick key
+                    grid.generate_random_walls(density=0.25)
+                    print("Generated random walls")
 
     pygame.quit()
 
