@@ -1,6 +1,7 @@
 import pygame
 import math
 import time
+import argparse
 from src.visualization.grid import Grid
 from src.visualization.visual_algorithms import (
     dijkstra_visual,
@@ -12,13 +13,17 @@ from src.algorithms.dijkstra import dijkstra
 from src.algorithms.bidirectional_skewed import BidirectionalDijkstra
 from src.algorithms.contraction_hierarchy import ContractionHierarchy
 
-# Window setup
-ROWS = 50 # dimension of N x N grid
-WIDTH = math.floor(1000/ROWS) * ROWS # Create the window rougly 1000 pixels wide
-WIN = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption("Shortest Path Visualization")
-
 def main():
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description='Shortest Path Visualization')
+    parser.add_argument('--rows', type=int, default=30, 
+                        help='Grid size (NxN), default is 30')
+    args = parser.parse_args()
+    
+    ROWS = args.rows # dimension of N x N grid
+    WIDTH = math.floor(1000/ROWS) * ROWS # Create the window roughly 1000 pixels wide
+    WIN = pygame.display.set_mode((WIDTH, WIDTH))
+    pygame.display.set_caption("Shortest Path Visualization")
     grid = Grid(ROWS, WIDTH)
 
     start = None

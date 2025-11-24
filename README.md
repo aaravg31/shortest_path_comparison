@@ -76,12 +76,18 @@ Run the visualization module:
 python -m src.visualization.main
 ```
 
+**Optional Arguments:**
+- `--rows N`: Set grid size to NxN (default: 30)
+  - Example: `python -m src.visualization.main --rows 50` for a 50x50 grid
+  - Larger grids provide more detail but may slow down the visualization
+
 ### Controls
 - **Left Click**: Place Start (Orange), End (Turquoise), or Walls (Black).
 - **Right Click**: Remove items.
 - **1**: Select Dijkstra's Algorithm.
 - **2**: Select Bidirectional Dijkstra.
 - **3**: Select Contraction Hierarchies.
+- **`** (Backtick): Generate random walls.
 - **SPACE**: Run the selected algorithm.
 - **R**: Reset path (keep walls).
 - **C**: Clear board.
