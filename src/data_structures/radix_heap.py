@@ -48,6 +48,43 @@ class RadixHeap:
         self._node_map[node] = (priority, b)
         self._size += 1
 
+    # PEEK
+    def peek(self) -> Tuple[Optional[Any], Optional[int]]:
+        """Return the (node, priority) with smallest priority without removing it."""
+        if self._size == 0:
+            return None, None
+
+        # ensure bucket 0 has candidates
+        if not self._buckets[0]:
+            self._refill_bucket_0()
+
+        # bucket 0 contains keys == current minimal key;
+        # we need to find a live entry
+        while self._buckets[0]:
+            node, prio = self._buckets[0][-1]
+            cur_prio, _ = self._node_map.get(node, (None, None))
+            if cur_prio == prio:
+                return node, prio
+            else:
+                self._buckets[0].pop() # Remove stale entry
+        
+        # If we drained bucket 0, try refilling again
+        if self._size == 0:
+            return None, None
+            
+        self._refill_bucket_0()
+        
+        # Try again
+        while self._buckets[0]:
+            node, prio = self._buckets[0][-1]
+            cur_prio, _ = self._node_map.get(node, (None, None))
+            if cur_prio == prio:
+                return node, prio
+            else:
+                self._buckets[0].pop()
+                
+        return None, None
+
     # EXTRACT MIN
     def extract_min(self) -> Tuple[Optional[Any], Optional[int]]:
         if self._size == 0:
