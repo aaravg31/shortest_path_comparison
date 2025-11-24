@@ -25,9 +25,14 @@ shortest_path_comparison/
 │   │   ├── binary_heap.py
 │   │   ├── fibonacci_heap.py
 │   │   └── radix_heap.py
-│   └── utils/
-│       ├── graph_generator.py         # Random directed graph generator
-│       └── benchmark_dijkstra.py      # Runtime analysis script
+│   ├── utils/
+│   │   ├── graph_generator.py         # Random directed graph generator
+│   │   └── benchmark_dijkstra.py      # Runtime analysis script
+│   └── visualization/                 # Interactive Pygame visualization
+│       ├── main.py                    # Main visualization loop and event handling
+│       ├── grid.py                    # Grid state management and rendering
+│       ├── visual_algorithms.py       # Generator-based visual algorithm wrappers
+│       └── presets.py                 # Preset grid configurations
 │
 ├── unit_tests/
 │   ├── test_binary_heap.py
@@ -43,6 +48,7 @@ shortest_path_comparison/
 │   └── plots/
 │
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
