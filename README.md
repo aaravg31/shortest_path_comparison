@@ -81,6 +81,11 @@ python -m src.visualization.main
   - Example: `python -m src.visualization.main --rows 50` for a 50x50 grid
   - Larger grids provide more detail but may slow down the visualization
   - The 50x50 grid is preset with a maze structure for ease of use
+- `--heap TYPE`: Set heap/priority queue type (default: binary)
+  - Choices: `binary`, `fibonacci`, `radix`
+  - Example: `python -m src.visualization.main --heap fibonacci`
+  - Affects all algorithms (Dijkstra, Bidirectional, Contraction Hierarchies)
+  - Use to compare heap performance characteristics
 
 ### Controls
 - **Left Click**: Place Start (Orange), End (Turquoise), or Walls (Black).

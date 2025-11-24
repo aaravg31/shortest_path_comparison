@@ -18,9 +18,13 @@ def main():
     parser = argparse.ArgumentParser(description='Shortest Path Visualization')
     parser.add_argument('--rows', type=int, default=30, 
                         help='Grid size (NxN), default is 30')
+    parser.add_argument('--heap', type=str, default='binary',
+                        choices=['binary', 'fibonacci', 'radix'],
+                        help='Heap type to use: binary, fibonacci, or radix (default: binary)')
     args = parser.parse_args()
     
     ROWS = args.rows # dimension of N x N grid
+    HEAP_TYPE = args.heap # heap type for algorithms
     WIDTH = math.floor(1000/ROWS) * ROWS # Create the window roughly 1000 pixels wide
     WIN = pygame.display.set_mode((WIDTH, WIDTH))
     pygame.display.set_caption("Shortest Path Visualization")
@@ -144,13 +148,13 @@ def main():
                     start_time = time.perf_counter()
                     
                     if current_algo_name == "Dijkstra":
-                        distances = dijkstra(graph, start_pos, heap_type="binary")
+                        distances = dijkstra(graph, start_pos, heap_type=HEAP_TYPE)
                         elapsed_time = time.perf_counter() - start_time
                         print(f"Dijkstra completed in {elapsed_time*1000:.2f} ms")
                         algorithm_generator = dijkstra_visual(graph, start_pos, end_pos)
                         
                     elif current_algo_name == "Bidirectional":
-                        bi_dijkstra = BidirectionalDijkstra(graph, heap_type="binary")
+                        bi_dijkstra = BidirectionalDijkstra(graph, heap_type=HEAP_TYPE)
                         distance = bi_dijkstra.find_shortest_path(start_pos, end_pos)
                         elapsed_time = time.perf_counter() - start_time
                         print(f"Bidirectional Dijkstra completed in {elapsed_time*1000:.2f} ms")
