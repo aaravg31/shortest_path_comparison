@@ -1,1 +1,0 @@
-"""Shortest path algorithms module."""
