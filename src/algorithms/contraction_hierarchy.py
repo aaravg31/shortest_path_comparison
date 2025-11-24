@@ -40,6 +40,7 @@ class ContractionHierarchy:
         self.node_order = []  # Stores nodes in contraction order
         self.rank = {}        # node -> rank (0 to N-1)
         self.is_contracted = {node: False for node in self.nodes}
+        self.shortcuts = {}   # (u, v) -> middle_node
         
         # Reverse graph for backward search and preprocessing
         self.reverse_graph = self._build_reverse_graph(self.graph)
@@ -154,7 +155,7 @@ class ContractionHierarchy:
                 
                 if witness_dist > target_dist:
                     # Add shortcut iv -> ov
-                    self._add_edge(iv, ov, target_dist)
+                    self._add_edge(iv, ov, target_dist, middle_node=u)
 
     def _local_dijkstra(self, source, target, limit, exclude):
         """
@@ -202,7 +203,11 @@ class ContractionHierarchy:
                 found = True
         return min_w if found else math.inf
 
-    def _add_edge(self, u, v, w):
+    def _add_edge(self, u, v, w, middle_node=None):
+        # Uncomment for debugging 
+        # if middle_node is not None:
+            #  print(f"Shortcut {u} -> {v} via {middle_node}")
+             
         # Add to graph
         if u not in self.graph: self.graph[u] = []
         self.graph[u].append((v, w))
@@ -210,6 +215,9 @@ class ContractionHierarchy:
         # Add to reverse graph
         if v not in self.reverse_graph: self.reverse_graph[v] = []
         self.reverse_graph[v].append((u, w))
+        
+        if middle_node is not None:
+            self.shortcuts[(u, v)] = middle_node
 
     def query(self, source: Any, target: Any) -> float:
         """
