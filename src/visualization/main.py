@@ -28,6 +28,27 @@ def main():
 
     start = None
     end = None
+    
+    # Load preset maze if 50x50
+    if ROWS == 50:
+        from src.visualization.presets import get_50x50_maze
+        preset = get_50x50_maze()
+        
+        # Set start and end
+        start_row, start_col = preset['start']
+        end_row, end_col = preset['end']
+        start = grid.get_node(start_row, start_col)
+        end = grid.get_node(end_row, end_col)
+        start.make_start()
+        end.make_end()
+        
+        # Place walls
+        for wall_row, wall_col in preset['walls']:
+            node = grid.get_node(wall_row, wall_col)
+            if node:
+                node.make_barrier()
+        
+        print(f"Loaded preset 50x50 maze with {len(preset['walls'])} walls")
 
     run = True
     started = False
