@@ -41,7 +41,7 @@ def benchmark_dijkstra():
         (100_000, 12),
         (500_000, 15),
         (1_000_000, 20),
-        # (2_000_000, 25),
+        (2_000_000, 25),
     ]
 
     # Store results per heap type

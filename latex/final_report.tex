@@ -122,7 +122,7 @@ Each tree in a Fibonacci Heap obeys the \emph{min-heap property}: the key of eve
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.85\linewidth]{plots/fibonacci_heap.png}
+  \includegraphics[width=0.75\linewidth]{plots/fibonacci_heap.png}
   \caption{Example of a Fibonacci Heap with multiple trees in the root list. The node with key 3 is the global minimum (adapted from GeeksforGeeks~\cite{geeksforgeeks_fibonacciheap}).}
   \label{fig:fibonacciheap}
 \end{figure}
@@ -166,10 +166,80 @@ T(V, E) = O(E + V \log V)
 \]
 This is better than the $O(E \log V)$ bound of Binary Heaps.  
 
+\subsubsection*{Space Complexity}
+The space usage of a Fibonacci Heap is primarily determined by the number of nodes and the auxiliary pointers stored in its tree structure. Each node maintains:
+\begin{itemize}
+  \item a pointer to its parent,
+  \item a pointer to one of its children,
+  \item left and right pointers for the circular doubly linked root list,
+  \item a degree value (number of children),
+  \item a mark bit for cascading cuts.
+\end{itemize}
+
+Every node therefore requires a constant amount of additional metadata. Since the total number of nodes in the heap is $n$, the space complexity is linear:
+\[
+S(n) = O(n)
+\]
+
+The consolidation process during \texttt{extract\_min} temporarily requires an auxiliary array of size $O(\log n)$ to store pointers to trees grouped by degree. However, this memory is negligible compared to the $O(n)$ main structure and does not affect the overall asymptotic bound.
+
+In summary, Fibonacci Heaps trade increased constant-factor memory usage for improved amortized time complexity, storing more structural information than Binary Heaps but remaining within the same linear space bound.
+
 \vspace{1em}
-However, in practice, Fibonacci Heaps might be slower due to their large constant factors and complex pointer manipulations. They are mainly of theoretical interest and in applications where the number of \texttt{decrease\_key} operations is exceptionally high. The implementation complexity also makes debugging and memory management more challenging compared to simpler structures like Binary Heaps.
+Fibonacci Heaps provide excellent theoretical performance, especially for algorithms such as Dijkstra’s where the \texttt{decrease\_key} operation is frequent. Their asymptotic running time of
+\[
+T(V, E) = O(E + V \log V)
+\]
+improves on the $O(E \log V)$ bound achieved with Binary Heaps.  
+Despite these advantages, Fibonacci Heaps may not always outperform simpler structures in practice due to larger constant factors, more complex pointer manipulation, and higher memory overhead. As a result, they serve primarily as a theoretical benchmark for optimal priority queue behavior rather than a go-to practical choice for large-scale systems.
 
 \subsection{Radix Heap}
+A \textbf{Radix Heap} is a monotone integer priority queue designed for algorithms such as Dijkstra’s where keys (distances) only \emph{increase} as the algorithm progresses. Unlike Binary or Fibonacci Heaps, which rely on tree structures, a Radix Heap organizes elements into a series of \emph{buckets}, each corresponding to a range of integer keys. These bucket ranges grow exponentially, allowing the heap to efficiently locate the minimum key in near-linear time over all operations.
+
+A Radix Heap requires that once a key is extracted, no smaller key will ever be inserted again. This \emph{monotonicity property} holds naturally in Dijkstra’s algorithm since shortest-path distances never decrease. The formal bucket construction and the monotone behavior were originally described by Ahuja, Mehlhorn, Orlin, and Tarjan~\cite{ahuja1990faster} and remain the foundation of modern implementations.
+
+Figure~\ref{fig:radixheap} illustrates an example of a Radix Heap after several operations, showing buckets with ranges such as $[8,15]$, $[16,31]$, $[32,63]$, and so on. Each bucket stores keys whose values fall within its range.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\linewidth]{plots/radix_heap.png}
+  \caption{Radix Heap bucket structure: each bucket represents an exponentially increasing range of integer keys (adapted from ImpulseTrain~\cite{impulsetrain_radixheap}).}
+  \label{fig:radixheap}
+\end{figure}
+
+\subsubsection*{Insertion}
+To insert a key, the heap determines the appropriate bucket by comparing the key with the current bucket boundaries. Each bucket represents a range $[b_i, b_{i+1})$ that grows exponentially.  
+Since determining the correct bucket requires only a small number of comparisons (typically $O(\log C)$ where $C$ is the maximum key), insertion is very efficient:
+\[
+T_{\text{insert}} = O(\log C).
+\]
+
+\subsubsection*{Extract\_Min}
+When extracting the minimum key, the heap first inspects the smallest bucket (bucket 0). If it is empty, the heap must ``refill'' it by finding the next non-empty bucket, identifying its minimum key, updating the bucket ranges, and redistributing its contents.  
+Although this refill step may seem expensive, it occurs only when necessary and each element is moved to a lower bucket only a small number of times. Amortized over all operations, this yields:
+\[
+T_{\text{extract\_min}} = O(\log C).
+\]
+
+\subsubsection*{decrease\_Key}
+The \texttt{decrease\_key} operation inserts a new smaller key for an existing element while marking the old entry as stale (lazy deletion). Since the new key can only move to a bucket of lower or equal index, the operation remains efficient:
+\[
+T_{\text{decrease\_key}} = O(\log C).
+\]
+
+\subsubsection*{Space Complexity}
+A Radix Heap stores all elements inside a fixed number of buckets, where the number of buckets is:
+\[
+B = \lfloor \log_2 C \rfloor + 2,
+\]
+with $C$ being the maximum possible key.  
+Each element appears only once (aside from lazily deleted stale entries), and the bucket list itself is of logarithmic size. Thus, the overall space usage is linear in the number of elements:
+\[
+S(n) = O(n).
+\]
+
+\vspace{1em}
+Radix Heaps offer particularly strong practical performance for Dijkstra’s algorithm when edge weights are small to moderate integers. Their bucket-based organization avoids the pointer-heavy overhead of Fibonacci Heaps while outperforming Binary Heaps on monotone workloads. Although their theoretical complexity ($O(m + n \log C)$) depends on the key range, they often perform well on sparse graphs with bounded edge weights.
 
 \subsection{BiDirectional Skewness}
 
@@ -182,7 +252,6 @@ Each heap class implements the following core methods:
   \item \texttt{insert(node, priority)} – Inserts a node into the heap with its associated distance value.
   \item \texttt{extract\_min()} – Removes and returns the node with the smallest priority value.
   \item \texttt{decrease\_key(node, new\_priority)} – Updates a node’s priority when a shorter path is found.
-  \item \texttt{is\_empty()} – Checks whether the heap contains any remaining nodes.
 \end{itemize}
 
 A unified implementation of Dijkstra’s algorithm was created in \texttt{dijkstra.py}, where the heap type can be switched dynamically:
@@ -193,70 +262,150 @@ dijkstra(graph, source, heap_type="binary")
 This modular design allows the same Dijkstra function to operate seamlessly with any heap type, enabling controlled comparisons of performance and runtime behavior under identical conditions.
 
 \subsection{Graph Generation}
-To test scalability, large random graphs were generated using a custom \texttt{graph\_generator.py} script located in the \texttt{utils} directory. Each graph is represented as a directed, weighted adjacency list:
+To evaluate scalability and performance across different heap implementations, large directed weighted graphs were generated using custom functions implemented in \texttt{graph\_generator.py}. Each graph is represented using a standard adjacency-list format:
 
 \[
-G = \{ u : [(v, w)], \ldots \}
+G = \{\, u : [(v, w)], \ldots \,\},
 \]
 
-where each node $u$ maps to a list of tuples $(v, w)$, representing a directed edge from $u$ to $v$ with weight $w$ randomly drawn from the range $[1, 10]$.
+where each node \(u\) maps to a list of outgoing edges \((v, w)\), with weights \(w\) sampled uniformly from \([1, 10]\).
 
-\subsubsection*{Generation Process}
-For each graph size, a specified number of nodes and an average number of outgoing edges per node were chosen.  
-The generator computes the total number of edges approximately as:
-
-\[
-E \approx \text{avg\_edges\_per\_node} \times V
-\]
-
-For example, a graph with $V = 500{,}000$ nodes and $15$ average edges per node produces roughly $7.5$ million directed edges. Edges and weights are randomly assigned, and the process is visualized using the \texttt{tqdm}~\cite{tqdm} progress bar for large-scale runs.
-
-The final experiments were conducted on four large-scale graphs of increasing size to evaluate scalability and runtime growth across different heap implementations.
+Two different random graph models were implemented:
 
 \begin{itemize}
-  \item 100K nodes → $\approx$ 1.2M edges  
-  \item 500K nodes → $\approx$7.5M edges  
-  \item 1M nodes → $\approx$20M edges  
-  \item 2M nodes → $\approx$50M edges  
+  \item \textbf{Erdős–Rényi (ER) Model} — Edges are added uniformly at random. This produces graphs with Poisson degree distributions, making ER suitable for controlled benchmarking due to predictable sparsity and generation speed.
+
+  \item \textbf{Barabási–Albert (BA) Model} — A preferential-attachment model that produces heavy-tailed, scale-free degree distributions similar to many real-world networks. This model offers improved structural realism at the cost of significantly higher generation time for large \(n\).
 \end{itemize}
 
-Larger graphs beyond 2 million nodes were not tested due to hardware constraints, specifically, the system’s 16GB memory capacity and the significant runtime required for dense graphs at that scale. Each graph was processed by the Dijkstra implementation using all three heap structures to record total execution time, enabling both theoretical and empirical performance comparisons.
+\subsubsection*{Choice of Graph Model for Experiments}
+While both ER and BA generators were implemented, the full experimental evaluation uses the \textbf{ER model} exclusively.  
+The BA model becomes computationally expensive at large scales (hundreds of thousands to millions of nodes) due to the need to maintain and repeatedly sample from a dynamically weighted degree distribution. On typical hardware, generating BA graphs of size comparable to ER graphs can take several minutes to hours.
+
+Thus, BA graphs were used only for smaller exploratory tests, while all large-scale benchmarking relies on ER graphs for consistent generation speed and reproducibility.
+
+\subsubsection*{Generation Parameters}
+For each experiment, the number of edges was selected using:
+
+\[
+E \approx (\text{avg\_edges\_per\_node}) \times V,
+\]
+
+yielding sparse graphs suitable for evaluating shortest-path algorithms. Progress bars were displayed using \texttt{tqdm}~\cite{tqdm} during large-scale generation.
+
+The main experimental dataset consists of ER graphs of the following sizes:
+
+\begin{itemize}
+    \item 10K nodes → $\approx$80K edges
+    \item 50K nodes → $\approx$500K edges
+    \item 100K nodes → $\approx$1.2M edges
+    \item 500K nodes → $\approx$7.5M edges
+    \item 1M nodes → $\approx$20M edges
+    \item 2M nodes → $\approx$50M edges  
+\end{itemize}
+
+Larger ER graphs beyond 2 million nodes were not tested due to hardware constraints, specifically, the system’s 16GB memory capacity and the significant runtime required for dense graphs at that scale. Each ER graph was processed with all three heap-based Dijkstra variants to compare runtime, memory usage, and scalability trends.
 
 \section{Results}
-All experiments were executed on a MacBook Pro M2 (16 GB RAM) using wall-clock time to measure total runtime for each heap implementation. Each experiment was repeated \textbf{twice} to ensure consistency and reproducibility of results, minimizing the effect of system background processes or transient performance variations.
+All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both \textbf{runtime} and \textbf{peak memory usage} were recorded for each heap implementation using 
+wall-clock time and Python’s \texttt{tracemalloc} module, respectively. Each experiment was repeated twice to ensure consistency and reduce noise from background processes.
 
 \begin{table}[H]
 \centering
-\caption{Runtime comparison of Dijkstra’s Algorithm using different heap implementations across two runs.}
+\caption{Runtime comparison of Dijkstra’s Algorithm using Binary, Radix, and Fibonacci Heaps across two runs.}
 \label{tab:runtimes}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{Heap Type} & \textbf{Run} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+\textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
 \midrule
-Binary Heap     & Run 1 & 0.77s & 6.55s & 15.29s & 237.31s \\
-                 & Run 2 & 0.91s & 5.77s & 14.20s & 143.59s \\
+Binary Heap     
+& Run 1 & 0.16s & 0.94s & 2.18s & 14.27s & 31.81s & 139.65s \\
+& Run 2 & 0.15s & 0.91s & 2.12s & 14.40s & 32.08s & 135.93s \\
 \midrule
-Radix Heap    & Run 1 & 0.76s & 6.31s & 13.80s & 152.58s \\
-                 & Run 2 & 0.78s & 5.60s & 12.79s & 73.23s \\
+Radix Heap      
+& Run 1 & 0.13s & 1.00s & 2.50s & 18.03s & 44.03s & 214.22s \\
+& Run 2 & 0.12s & 1.01s & 2.50s & 17.94s & 43.96s & 274.35s \\
 \midrule
-Fibonacci Heap  & Run 1 & 0.90s & 6.46s & 15.66s & 78.97s \\
-                 & Run 2 & 0.86s & 5.91s & 14.73s & 50.16s \\
+Fibonacci Heap  
+& Run 1 & 0.14s & 0.68s & 1.51s & 9.58s & 22.03s & 57.85s \\
+& Run 2 & 0.13s & 0.64s & 1.52s & 9.83s & 21.94s & 154.22s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/runtime_comparison_1.png}
+    \caption{Runtime (Run 1)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/runtime_comparison_2.png}
+    \caption{Runtime (Run 2)}
+\end{subfigure}
+\caption{Normal runtime comparison across heap types for Run 1 and Run 2.}
+\label{fig:runtime-normal}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/runtime_comparison_log_1.png}
+    \caption{Log-scale Runtime (Run 1)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/runtime_comparison_log_2.png}
+    \caption{Log-scale Runtime (Run 2)}
+\end{subfigure}
+\caption{Log-scale runtime comparison across heap types for Run 1 and Run 2.}
+\label{fig:runtime-log}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Peak memory usage (MiB) during Dijkstra’s Algorithm for each heap implementation across two runs.}
+\label{tab:memory}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+\midrule
+Binary Heap     
+& Run 1 & 1.14 & 9.20 & 18.96 & 79.30 & 160.08 & 321.93 \\
+& Run 2 & 1.14 & 9.20 & 18.96 & 79.30 & 160.08 & 321.93 \\
+\midrule
+Radix Heap      
+& Run 1 & 1.60 & 11.76 & 25.86 & 152.86 & 319.40 & 579.09 \\
+& Run 2 & 1.60 & 11.76 & 25.86 & 152.86 & 319.40 & 579.09 \\
+\midrule
+Fibonacci Heap  
+& Run 1 & 1.37 & 10.53 & 21.72 & 91.63 & 185.27 & 375.67 \\
+& Run 2 & 1.37 & 10.53 & 21.72 & 91.63 & 185.27 & 375.67 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\linewidth]{plots/runtime_comparison.png}
-  \caption{Runtime comparison of Dijkstra’s Algorithm (Run 1)}
-  \label{fig:runtime1}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.8\linewidth]{plots/runtime_comparison_log.png}
-  \caption{Runtime comparison of Dijkstra’s Algorithm (Run 2)}
-  \label{fig:runtime2}
+\centering
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/memory_comparison_1.png}
+    \caption{Memory Usage (Run 1)}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{plots/memory_comparison_2.png}
+    \caption{Memory Usage (Run 2)}
+\end{subfigure}
+\caption{Peak memory usage comparison across heap types for Run 1 and Run 2.}
+\label{fig:memory-usage}
 \end{figure}
 
 \section{Visualization}
@@ -270,6 +419,37 @@ To provide accurate performance comparisons without visualization overhead, each
 This visualization tool serves as both an educational resource for understanding algorithmic behavior and a practical benchmarking environment to analyze performance for different graph structures.
 
 \section{Discussion}
+
+The empirical results reveal clear performance differences among the Binary Heap, Radix Heap, and Fibonacci Heap when used within Dijkstra’s algorithm. While all three structures scale roughly as expected theoretically, real-world implementation factors, memory usage, and workload characteristics significantly influence their actual performance.
+
+\vspace{1em}
+
+Across all graph sizes, the Fibonacci Heap consistently delivered the fastest runtimes, particularly on larger graphs where decrease\_key operations dominate computation. This matches theoretical expectations: with amortized \(O(1)\) decrease\_key and \(O(\log n)\) extract\_min, Fibonacci Heaps become increasingly advantageous as the edge count grows. However, an interesting observation from the second experimental run is that the Fibonacci Heap occasionally took slightly longer than in the first run. This variation is typical of Python-based pointer-heavy structures: garbage collection cycles, memory fragmentation, and CPU scheduling variability can influence runtimes, especially for data structures with large linked-node overhead. These effects are magnified on large root lists and during consolidation, explaining the run-to-run fluctuations.
+
+\vspace{1em}
+
+The Binary Heap showed predictable and stable performance, with runtimes growing steadily with graph size. Its simple contiguous array structure, low constant factors, and cache-friendly memory layout make it competitive at small and moderate scales. Nevertheless, as the graph size reached the upper bounds of the experiment (1--2M nodes), its \(O(\log n)\) decrease\_key penalties accumulated and caused the runtime to grow faster than that of the Fibonacci Heap. Despite this, Binary Heaps remained significantly more memory-efficient due to requiring only one integer and one pointer per entry.
+
+\vspace{1em}
+
+The Radix Heap, although theoretically promising for monotone integer priority workloads, consistently performed worse than both other heaps in these experiments. There are several reasons for this behavior:
+
+\begin{itemize}
+    \item \textbf{Bucket Redistribution Overhead:} Radix Heaps require periodic "refill" operations that scan bucket contents, recompute bucket boundaries, and reinsert elements. Although amortized complexity remains low, the constant cost of bucket redistribution is substantial in Python.
+    \item \textbf{Python Implementation Limitations:} The Radix Heap relies heavily on list operations, repeated scans, and dictionary lookups for stale-entry handling. These operations are significantly slower in Python than the pointer-based operations in Fibonacci Heaps.
+    \item \textbf{Large Key Range:} Since key ranges in dense Erdős–Rényi graphs grow rapidly as distances accumulate, the number of buckets increases (\(\lfloor \log_2 C \rfloor + 2\)). Larger bucket arrays lead to more redistribution work and more frequent boundary updates.
+    \item \textbf{High Memory Footprint:} The Radix Heap used nearly twice as much memory as the Binary Heap, leading to poorer cache locality and additional overhead during Python’s memory management cycles.
+\end{itemize}
+
+These factors explain why the Radix Heap, despite excellent performance in low-level languages like C or C++, performs less favorably in Python. In this environment, the higher constant factors overshadow its theoretical monotone advantages.
+
+\vspace{1em}
+
+Memory usage results further reinforce these conclusions. The Binary Heap consumed the least memory due to its simple array representation, followed by the Fibonacci Heap, which requires multiple pointers per node but uses them efficiently during consolidation. The Radix Heap consumed the most memory, sometimes nearly double, due to its dictionary-based stale-entry tracking and large bucket arrays. This elevated memory usage not only increases the overall footprint but also contributes to slower runtime through decreased cache efficiency and increased garbage collection activity.
+
+\vspace{1em}
+
+Overall, the experiments highlight that while theoretical bounds are informative, real-world performance is shaped by constant factors, implementation language, memory behavior, and workload characteristics. Under Python, the Fibonacci Heap offers the best runtime scalability, the Binary Heap provides predictable and memory-efficient performance, and the Radix Heap, though algorithmically suitable for monotone priority queues, incurs enough overhead to underperform relative to the other two structures.
 
 \section{Conclusion}
 
