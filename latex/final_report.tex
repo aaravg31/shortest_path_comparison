@@ -465,7 +465,7 @@ All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. 
 
 
 \subsection{Contraction Hierarchies Results}
-Due to the high computational cost of the preprocessing phase in Python, Contraction Hierarchies were evaluated on smaller graph sizes. Table~\ref{tab:ch_results} illustrates the trade-off: while preprocessing time grows rapidly (super-linearly), the resulting query times are orders of magnitude faster than standard Dijkstra.
+Due to the high computational cost of the preprocessing phase in Python, Contraction Hierarchies were evaluated on smaller graph sizes. Table~\ref{tab:ch_results} illustrates the trade-off: while preprocessing time grows rapidly, the resulting query times are orders of magnitude faster than standard Dijkstra.
 
 \begin{table}[H]
   \centering
@@ -477,10 +477,16 @@ Due to the high computational cost of the preprocessing phase in Python, Contrac
     \midrule
     100            & 0.21                            & 0.00005                     \\
     500            & 53.71                           & 0.00073                     \\
-    1000           & ?                               & ?                           \\
+    1000           & 759.47                          & 0.00156                     \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+Based on the observed data, the preprocessing time $T$ scales with the number of edges $E$ according to the power law:
+\[
+  T \approx 1.59 \times 10^{-8} \cdot E^{2.74}
+\]
+This super-quadratic growth ($O(E^{2.74})$) shows that preprocessing becomes prohibitively expensive for larger graphs in our Python implementation, despite the query times remaining extremely low. The high exponent is likely due to the overhead of repeated local Dijkstra searches and the dynamic addition of shortcut edges, which increases the graph density during the contraction process.
 
 \section{Visualization}
 
