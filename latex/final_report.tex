@@ -241,7 +241,58 @@ S(n) = O(n).
 \vspace{1em}
 Radix Heaps offer particularly strong practical performance for Dijkstra’s algorithm when edge weights are small to moderate integers. Their bucket-based organization avoids the pointer-heavy overhead of Fibonacci Heaps while outperforming Binary Heaps on monotone workloads. Although their theoretical complexity ($O(m + n \log C)$) depends on the key range, they often perform well on sparse graphs with bounded edge weights.
 
-\subsection{BiDirectional Skewness}
+\subsection{Bidirectional Dijkstra}
+Bidirectional Dijkstra~\cite{bidirectional} is an optimization of the standard Dijkstra algorithm that executes two simultaneous searches: a \textbf{forward search} from the source node and a \textbf{backward search} from the target node. The algorithm terminates when the two search frontiers meet, often significantly reducing the number of visited nodes compared to the standard, unidirectional search.
+
+\subsubsection*{Search Strategy}
+In a standard Dijkstra search, the explored area expands as a circle centered at the source. If the target is at distance $r$, the search visits approximately $\pi r^2$ nodes. In contrast, Bidirectional Dijkstra expands two smaller circles of radius $r/2$, visiting approximately $2 \times \pi (r/2)^2 = \pi r^2 / 2$ nodes, potentially halving the search space.
+
+\subsubsection*{Skewed Expansion}
+Standard bidirectional search typically alternates between the forward and backward heaps in a round-robin order (1:1). However, this may be inefficient if one frontier expands into a sparse region while the other is stuck in a dense one. 
+\textbf{Skewed Bidirectional Dijkstra} addresses this by dynamically balancing the search. The direction of expansion is chosen based on the relative sizes of the priority queues:
+\[
+|Q_{f}| \cdot (1 - \sigma) \le |Q_{b}| \cdot \sigma
+\]
+where $|Q_{f}|$ and $|Q_{b}|$ are the sizes of the forward and backward heaps, and $\sigma \in [0, 1]$ is a skew parameter.
+\begin{itemize}
+    \item $\sigma = 0.5$: Balanced expansion (expands the smaller frontier).
+    \item $\sigma < 0.5$: Biased towards backward expansion.
+    \item $\sigma > 0.5$: Biased towards forward expansion.
+\end{itemize}
+This heuristic tries to keep the search frontiers balanced in terms of cost rather than just distance.
+
+\subsubsection*{Termination}
+The algorithm maintains a value $\mu$, representing the shortest path distance found so far connecting the two search trees. The search terminates when the sum of the minimum keys from both heaps exceeds $\mu$:
+\[
+\min(Q_f) + \min(Q_b) \ge \mu
+\]
+At this point, no shorter path can exist, and $\mu$ is returned as the optimal distance.
+
+\subsection{Contraction Hierarchies}
+\textbf{Contraction Hierarchies (CH)}~\cite{contraction} is a speed-up technique designed for static road networks. It relies on a computationally expensive \textbf{preprocessing phase} to accelerate the following \textbf{query phases}. The core idea is to create a hierarchy of nodes where queries only need to visit nodes that are "more important" than the current node, minimizing the search space.
+
+\subsubsection*{Preprocessing Phase}
+The preprocessing phase orders all nodes by "importance" and iteratively \textbf{contracts} them. Contracting a node $u$ involves removing it from the graph and adding \textbf{shortcuts} between its neighbors $\{v_i\}$ to preserve shortest path distances. A shortcut $(v_i, v_j)$ with weight $w(v_i, u) + w(u, v_j)$ is added if the path through $u$ is the unique shortest path between $v_i$ and $v_j$.
+
+The importance of a node is determined using a heuristic that penalizes adding too many shortcuts:
+\[
+I(u) = (\text{Shortcuts Added}) - (\text{Edges Removed}) + (\text{Contracted Neighbors})
+\]
+Nodes are contracted in increasing order of importance (from least to most important). This process effectively pushes local, unimportant nodes (like residential streets) to the bottom of the hierarchy, while major hubs remain at the top.
+
+\subsubsection*{Query Phase}
+The query phase executes a bidirectional Dijkstra search on the augmented graph (original edges + shortcuts), but with a strict rank constraint:
+\begin{itemize}
+    \item \textbf{Forward Search:} Only relaxes edges $(u, v)$ where $\text{rank}(u) < \text{rank}(v)$.
+    \item \textbf{Backward Search:} Only relaxes edges $(u, v)$ in the reverse graph where $\text{rank}(u) < \text{rank}(v)$.
+\end{itemize}
+This "upward-only" search strategy ensures that the algorithm quickly ascends the hierarchy, ignoring the majority of low-ranking nodes. The forward and backward searches meet at the node with the highest rank on the shortest path.
+
+\subsubsection*{Complexity}
+\begin{itemize}
+    \item \textbf{Preprocessing:} Heuristic but typically takes many minutes for millions of nodes.
+    \item \textbf{Query:} Extremely fast, often sub-millisecond on road networks, as the search space is reduced from millions of nodes to just a few hundred or thousand.
+\end{itemize}
 
 \section{Methodology}
 All three heaps, Binary, Radix, and Fibonacci, were implemented entirely in \textbf{Python 3} from scratch.  
@@ -454,11 +505,11 @@ Overall, the experiments highlight that while theoretical bounds are informative
 \section{Conclusion}
 
 \section*{GitHub Repository}
-The full implementation (data structures, Dijkstra’s algorithm, unit tests, and benchmark plots) is available at:  
+The full implementation (data structures, algorithms, unit tests, visualization, and benchmark plots) is available at:  
 \url{https://github.com/aaravg31/shortest_path_comparison}
 
 \section*{Acknowledgements}
-We would like to acknowledge ChatGPT \cite{chatgpt} for assistance with code explanations, debugging, and report language refinement.
+We would like to acknowledge the use of ChatGPT \cite{chatgpt} for assisting with documentation, debugging, and report language refinement.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
