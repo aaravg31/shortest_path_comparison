@@ -30,8 +30,8 @@
 
 \begin{abstract}
   This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
-  
-  [UPDATE BASED ON RESULTS AND ABOUT CH]
+
+    [UPDATE BASED ON RESULTS AND ABOUT CH]
 \end{abstract}
 
 \keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Graph Algorithms, Priority Queues}
@@ -54,9 +54,9 @@ This report examines and compares three priority queue data structures that can 
   \item \textbf{Radix Heap} – A monotone integer priority queue tailored for Dijkstra on graphs with non-negative edge weights. It exploits the fact that extracted distances are non-decreasing, achieving $O(1)$ amortized insert and decrease\_key, and $O(\log C)$ for extract\_min, where $C$ is the maximum key difference. This makes it highly efficient on graphs with bounded or small integer weights.
 \end{enumerate}
 
-In addition to these data structures, this project will also extend the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target. 
+In addition to these data structures, this project will also extend the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target.
 
-[ADD ABOUT CH TOO AND BIDIRECTIONAL FOR ALL 3 HEAPS]
+  [ADD ABOUT CH TOO AND BIDIRECTIONAL FOR ALL 3 HEAPS]
 
 \vspace{1em}
 Overall, the goal of this project is to provide both a theoretical and empirical comparison of these structures and Dijkstra implementations, evaluating their runtime behavior, scalability, and memory characteristics when applied to large synthetic graphs.
@@ -391,78 +391,78 @@ Larger ER graphs beyond 2 million nodes were not tested due to hardware constrai
 All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both runtime and peak memory usage were recorded for each heap implementation using wall-clock time and Python’s tracemalloc module. For graphs with up to 500,000 nodes, each configuration (algorithm–heap pair) was executed three times, and we report the average runtime and peak memory to reduce noise from background processes. For larger graphs with 1M and 2M nodes, each configuration was run once due to the substantial computation time and memory required.
 
 \begin{table}[H]
-\centering
-\caption{Average runtime (in seconds) of Dijkstra and Bidirectional Dijkstra with Binary, Radix, and Fibonacci Heaps. For $V \leq 500\text{K}$, values are averaged over three runs; for $V \geq 1\text{M}$, a single run is reported.}
-\label{tab:runtimes}
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Heap Type} & \textbf{Algorithm} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
-\midrule
-\multirow{2}{*}{Binary Heap}
-& Dijkstra           & 0.14s & 0.96s & 2.24s & 14.87s & 33.48s  & 200.38s \\
-& Bidirectional      & 0.05s & 0.39s & 1.00s & 7.99s  & 22.73s  & 470.46s \\
-\midrule
-\multirow{2}{*}{Radix Heap}
-& Dijkstra           & 0.12s & 1.07s & 2.76s & 18.39s & 44.53s  & 271.37s \\
-& Bidirectional      & 0.06s & 0.43s & 1.11s & 8.87s  & 24.39s  & 482.72s \\
-\midrule
-\multirow{2}{*}{Fibonacci Heap}
-& Dijkstra           & 0.13s & 0.67s & 1.61s & 9.74s  & 21.71s  & 123.56s \\
-& Bidirectional      & 0.05s & 0.40s & 1.01s & 8.08s  & 21.82s  & 313.88s \\
-\bottomrule
-\end{tabular}
+  \centering
+  \caption{Average runtime (in seconds) of Dijkstra and Bidirectional Dijkstra with Binary, Radix, and Fibonacci Heaps. For $V \leq 500\text{K}$, values are averaged over three runs; for $V \geq 1\text{M}$, a single run is reported.}
+  \label{tab:runtimes}
+  \begin{tabular}{lccccccc}
+    \toprule
+    \textbf{Heap Type} & \textbf{Algorithm} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+    \midrule
+    \multirow{2}{*}{Binary Heap}
+                       & Dijkstra           & 0.14s        & 0.96s        & 2.24s         & 14.87s        & 33.48s      & 200.38s     \\
+                       & Bidirectional      & 0.05s        & 0.39s        & 1.00s         & 7.99s         & 22.73s      & 470.46s     \\
+    \midrule
+    \multirow{2}{*}{Radix Heap}
+                       & Dijkstra           & 0.12s        & 1.07s        & 2.76s         & 18.39s        & 44.53s      & 271.37s     \\
+                       & Bidirectional      & 0.06s        & 0.43s        & 1.11s         & 8.87s         & 24.39s      & 482.72s     \\
+    \midrule
+    \multirow{2}{*}{Fibonacci Heap}
+                       & Dijkstra           & 0.13s        & 0.67s        & 1.61s         & 9.74s         & 21.71s      & 123.56s     \\
+                       & Bidirectional      & 0.05s        & 0.40s        & 1.01s         & 8.08s         & 21.82s      & 313.88s     \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_runtime_linear.png}
-    \caption{
-        Runtime comparison of Dijkstra and Bidirectional Dijkstra (skewed search) using Binary, Radix, and Fibonacci Heaps on a linear scale.
-    }
-    \label{fig:runtime_linear}
+  \centering
+  \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_runtime_linear.png}
+  \caption{
+    Runtime comparison of Dijkstra and Bidirectional Dijkstra (skewed search) using Binary, Radix, and Fibonacci Heaps on a linear scale.
+  }
+  \label{fig:runtime_linear}
 \end{figure}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_runtime_log.png}
-    \caption{
-        Log-scale runtime comparison of Dijkstra and Bidirectional Dijkstra across 
-        increasing graph sizes for all heap types.
-    }
-    \label{fig:runtime_log}
+  \centering
+  \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_runtime_log.png}
+  \caption{
+    Log-scale runtime comparison of Dijkstra and Bidirectional Dijkstra across
+    increasing graph sizes for all heap types.
+  }
+  \label{fig:runtime_log}
 \end{figure}
 
 \begin{table}[H]
-\centering
-\caption{Peak memory usage (in MiB) of Dijkstra and Bidirectional Dijkstra with Binary, Radix, and Fibonacci Heaps. For $V \leq 500\text{K}$, values correspond to the stable peak observed across three runs; for $V \geq 1\text{M}$, a single run is reported.}
-\label{tab:memory}
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Heap Type} & \textbf{Algorithm} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
-\midrule
-\multirow{2}{*}{Binary Heap}
-& Dijkstra           & 1.07  & 9.20   & 18.96  & 79.30   & 160.08  & 321.93  \\
-& Bidirectional      & 5.92  & 37.41  & 86.89  & 522.97  & 1351.56 & 3294.57 \\
-\midrule
-\multirow{2}{*}{Radix Heap}
-& Dijkstra           & 1.60  & 11.76  & 25.86  & 152.86  & 319.40  & 579.09  \\
-& Bidirectional      & 5.90  & 37.15  & 86.58  & 519.41  & 1342.25 & 3296.11 \\
-\midrule
-\multirow{2}{*}{Fibonacci Heap}
-& Dijkstra           & 1.36  & 10.53  & 21.71  & 91.63   & 185.27  & 375.67  \\
-& Bidirectional      & 5.91  & 37.52  & 87.01  & 523.98  & 1353.41 & 3294.99 \\
-\bottomrule
-\end{tabular}
+  \centering
+  \caption{Peak memory usage (in MiB) of Dijkstra and Bidirectional Dijkstra with Binary, Radix, and Fibonacci Heaps. For $V \leq 500\text{K}$, values correspond to the stable peak observed across three runs; for $V \geq 1\text{M}$, a single run is reported.}
+  \label{tab:memory}
+  \begin{tabular}{lccccccc}
+    \toprule
+    \textbf{Heap Type} & \textbf{Algorithm} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+    \midrule
+    \multirow{2}{*}{Binary Heap}
+                       & Dijkstra           & 1.07         & 9.20         & 18.96         & 79.30         & 160.08      & 321.93      \\
+                       & Bidirectional      & 5.92         & 37.41        & 86.89         & 522.97        & 1351.56     & 3294.57     \\
+    \midrule
+    \multirow{2}{*}{Radix Heap}
+                       & Dijkstra           & 1.60         & 11.76        & 25.86         & 152.86        & 319.40      & 579.09      \\
+                       & Bidirectional      & 5.90         & 37.15        & 86.58         & 519.41        & 1342.25     & 3296.11     \\
+    \midrule
+    \multirow{2}{*}{Fibonacci Heap}
+                       & Dijkstra           & 1.36         & 10.53        & 21.71         & 91.63         & 185.27      & 375.67      \\
+                       & Bidirectional      & 5.91         & 37.52        & 87.01         & 523.98        & 1353.41     & 3294.99     \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_memory.png}
-    \caption{
-        Peak memory usage for Dijkstra and Bidirectional Dijkstra 
-        using Binary, Radix, and Fibonacci Heaps.
-    }
-    \label{fig:memory_usage}
+  \centering
+  \includegraphics[width=0.95\linewidth]{plots/dijkstra_vs_bidijkstra_memory.png}
+  \caption{
+    Peak memory usage for Dijkstra and Bidirectional Dijkstra
+    using Binary, Radix, and Fibonacci Heaps.
+  }
+  \label{fig:memory_usage}
 \end{figure}
 
 \section{Visualization}
@@ -510,11 +510,11 @@ Memory usage results further reinforce these conclusions. The Binary Heap consum
 
 Overall, the experiments highlight that while theoretical bounds are informative, real-world performance is shaped by constant factors, implementation language, memory behavior, and workload characteristics. Under Python, the Fibonacci Heap offers the best runtime scalability, the Binary Heap provides predictable and memory-efficient performance, and the Radix Heap, though algorithmically suitable for monotone priority queues, incurs enough overhead to underperform relative to the other two structures.
 
-[ANALYSIS OF BIDIRECTIONAL AND COMPARISON VS NORMAL]
+  [ANALYSIS OF BIDIRECTIONAL AND COMPARISON VS NORMAL]
 
 \section{Conclusion}
 
-[BRIEF CONCLUSION]
+ [BRIEF CONCLUSION]
 
 \section*{GitHub Repository}
 The full implementation (data structures, algorithms, unit tests, visualization, and benchmark plots) is available at:
