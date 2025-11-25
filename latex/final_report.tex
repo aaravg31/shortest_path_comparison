@@ -28,9 +28,9 @@
   \country{Canada}}
 
 \begin{abstract}
-This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
+  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
 
-[Results summary to be completed once experiments are finalized.]
+    [Results summary to be completed once experiments are finalized.]
 \end{abstract}
 
 \keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Graph Algorithms, Priority Queues}
@@ -47,9 +47,9 @@ This report examines and compares three priority queue data structures that can 
 
 \begin{enumerate}
   \item \textbf{Binary Heap} – A widely used baseline implementation offering $O(\log n)$ extract\_min and decrease\_key, forming the standard version taught in most courses.
-  
+
   \item \textbf{Fibonacci Heap} – A theoretically optimal structure with $O(1)$ amortized decrease\_key and $O(\log n)$ extract\_min, often cited for achieving Dijkstra’s best-known theoretical bound of $O(m + n \log n)$.
-  
+
   \item \textbf{Radix Heap} – A monotone integer priority queue tailored for Dijkstra on graphs with non-negative edge weights. It exploits the fact that extracted distances are non-decreasing, achieving $O(1)$ amortized insert and decrease\_key, and $O(\log C)$ for extract\_min, where $C$ is the maximum key difference. This makes it highly efficient on graphs with bounded or small integer weights.
 \end{enumerate}
 
@@ -62,7 +62,7 @@ Overall, the goal of this project is to provide both a theoretical and empirical
 This section discusses the underlying principles of Dijkstra’s algorithm, the priority queue data structures used to optimize it, and bidirectional skewness.
 
 \subsection{Dijkstra’s Algorithm Overview}
-Dijkstra’s algorithm finds the shortest path from a source node to all other nodes in a weighted graph with non-negative edge weights. It repeatedly extracts the node with the smallest tentative distance and updates its neighbors.  
+Dijkstra’s algorithm finds the shortest path from a source node to all other nodes in a weighted graph with non-negative edge weights. It repeatedly extracts the node with the smallest tentative distance and updates its neighbors.
 
 The efficiency of Dijkstra’s algorithm largely depends on how the “next smallest distance” is retrieved and updated, i.e., on the efficiency of the \texttt{extract\_min} and \texttt{decrease\_key} operations. Therefore, the overall performance of Dijkstra’s algorithm depends directly on the choice of priority queue.
 
@@ -84,29 +84,29 @@ This array-based representation eliminates the need for pointers, making Binary 
 \end{figure}
 
 \subsubsection*{Insertion}
-When a new element is inserted, it is first placed at the end of the array (to maintain the complete tree property). Then, it is repeatedly compared with its parent and swapped upward until the heap property is restored. This upward movement is known as a \textbf{sift-up} or \textbf{bubble-up}.  
-Since each level in the tree can contain twice as many nodes as the previous one, and the heap’s height is $\log_2 n$, the insertion process requires at most $\log n$ swaps.  
+When a new element is inserted, it is first placed at the end of the array (to maintain the complete tree property). Then, it is repeatedly compared with its parent and swapped upward until the heap property is restored. This upward movement is known as a \textbf{sift-up} or \textbf{bubble-up}.
+Since each level in the tree can contain twice as many nodes as the previous one, and the heap’s height is $\log_2 n$, the insertion process requires at most $\log n$ swaps.
 \[
-T_{\text{insert}} = O(\log n)
+  T_{\text{insert}} = O(\log n)
 \]
 
 \subsubsection*{Extract\_Min}
-Extracting the minimum element involves removing the root (the smallest key). To maintain completeness, the last element in the array is moved to the root position. Then, it is repeatedly swapped with the smaller of its two children until the heap property is restored. This process is called \textbf{sift-down} or \textbf{heapify}.  
-Each swap moves the element one level deeper, and the tree height is $\log n$, so the operation takes logarithmic time.  
+Extracting the minimum element involves removing the root (the smallest key). To maintain completeness, the last element in the array is moved to the root position. Then, it is repeatedly swapped with the smaller of its two children until the heap property is restored. This process is called \textbf{sift-down} or \textbf{heapify}.
+Each swap moves the element one level deeper, and the tree height is $\log n$, so the operation takes logarithmic time.
 \[
-T_{\text{extract\_min}} = O(\log n)
+  T_{\text{extract\_min}} = O(\log n)
 \]
 
 \subsubsection*{decrease\_Key}
-The \texttt{decrease\_key} operation lowers the key value of an element in the heap. Because the key becomes smaller, the node may violate the heap property with respect to its parent. Therefore, the element is moved upward using the same \textbf{sift-up} procedure as insertion. In the worst case, it moves up to the root, resulting in logarithmic time.  
+The \texttt{decrease\_key} operation lowers the key value of an element in the heap. Because the key becomes smaller, the node may violate the heap property with respect to its parent. Therefore, the element is moved upward using the same \textbf{sift-up} procedure as insertion. In the worst case, it moves up to the root, resulting in logarithmic time.
 \[
-T_{\text{decrease\_key}} = O(\log n)
+  T_{\text{decrease\_key}} = O(\log n)
 \]
 
 \subsubsection*{Space Complexity}
 A Binary Heap stores all elements in a single contiguous array, which makes its space usage straightforward to analyze. The heap requires one array slot per element, leading to a total memory footprint of
 \[
-O(n)
+  O(n)
 \]
 where $n$ is the number of elements in the heap.
 
@@ -116,7 +116,7 @@ Because the array representation avoids pointers entirely, Binary Heaps have exc
 Binary Heaps are conceptually simple, have small constant factors, and perform well in practice due to their contiguous memory layout. They are the default choice for most implementations of Dijkstra’s algorithm in production systems. However, their performance can degrade for dense graphs where the number of \texttt{decrease\_key} operations is large, motivating more advanced structures such as the \textbf{Radix Heap} and \textbf{Fibonacci Heap}.
 
 \subsection{Fibonacci Heap}
-A \textbf{Fibonacci Heap} is an advanced data structure that improves the efficiency of priority queue operations through a collection of \emph{heap-ordered trees}. Unlike Binary Heaps, it performs most operations in constant amortized time by deferring expensive structural adjustments until absolutely necessary.  
+A \textbf{Fibonacci Heap} is an advanced data structure that improves the efficiency of priority queue operations through a collection of \emph{heap-ordered trees}. Unlike Binary Heaps, it performs most operations in constant amortized time by deferring expensive structural adjustments until absolutely necessary.
 
 Each tree in a Fibonacci Heap obeys the \emph{min-heap property}: the key of every node is greater than or equal to that of its parent. The heap maintains a circular doubly linked list of all tree roots (the \emph{root list}), with a pointer to the minimum key node.
 
@@ -128,43 +128,43 @@ Each tree in a Fibonacci Heap obeys the \emph{min-heap property}: the key of eve
 \end{figure}
 
 \subsubsection*{Insertion}
-To insert a new key, a single-node tree is created and added directly to the root list. The minimum pointer is updated if the new key is smaller than the current minimum.  
-Since no tree restructuring or traversal is required, the insertion operation runs in \textbf{constant time}.  
+To insert a new key, a single-node tree is created and added directly to the root list. The minimum pointer is updated if the new key is smaller than the current minimum.
+Since no tree restructuring or traversal is required, the insertion operation runs in \textbf{constant time}.
 \[
-T_{\text{insert}} = O(1)
+  T_{\text{insert}} = O(1)
 \]
 
 \subsubsection*{Extract\_Min}
-The \texttt{extract\_min} operation removes the node pointed to by the minimum pointer. Its children are then added to the root list, effectively promoting them to become separate trees. To restore the heap’s structure, trees in the root list with the same degree (number of children) are \textbf{consolidated} by linking one tree as a child of another with a smaller key.  
+The \texttt{extract\_min} operation removes the node pointed to by the minimum pointer. Its children are then added to the root list, effectively promoting them to become separate trees. To restore the heap’s structure, trees in the root list with the same degree (number of children) are \textbf{consolidated} by linking one tree as a child of another with a smaller key.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\linewidth]{plots/fibonacci_heap2.png}
-  \caption{Illustration of the \texttt{extract\_min} operation in a Fibonacci Heap. 
-  The minimum node (3) is removed, and its children are added to the root list, followed by consolidation of trees with equal degree 
-  (adapted from OpenGenus~\cite{opengenus_fibonacciheap}).}
+  \caption{Illustration of the \texttt{extract\_min} operation in a Fibonacci Heap.
+    The minimum node (3) is removed, and its children are added to the root list, followed by consolidation of trees with equal degree
+    (adapted from OpenGenus~\cite{opengenus_fibonacciheap}).}
   \label{fig:fibonacciheap_extractmin}
 \end{figure}
 
-The consolidation process ensures that the number of trees in the heap is logarithmic with respect to $n$, the total number of nodes. Therefore, while individual link operations are constant time, the entire \texttt{extract\_min} runs in amortized logarithmic time.  
+The consolidation process ensures that the number of trees in the heap is logarithmic with respect to $n$, the total number of nodes. Therefore, while individual link operations are constant time, the entire \texttt{extract\_min} runs in amortized logarithmic time.
 \[
-T_{\text{extract\_min}} = O(\log n)
+  T_{\text{extract\_min}} = O(\log n)
 \]
 
 \subsubsection*{decrease\_Key}
-The \texttt{decrease\_key} operation reduces the key value of a node. If the new key violates the heap property (i.e., becomes smaller than its parent), the node is \textbf{cut} from its parent and added to the root list.  
-To maintain balance, if a parent loses more than one child, it is also cut, a process known as a \textbf{cascading cut}.  
+The \texttt{decrease\_key} operation reduces the key value of a node. If the new key violates the heap property (i.e., becomes smaller than its parent), the node is \textbf{cut} from its parent and added to the root list.
+To maintain balance, if a parent loses more than one child, it is also cut, a process known as a \textbf{cascading cut}.
 
-Since cuts involve constant-time pointer manipulations, the amortized time for this operation remains constant.  
+Since cuts involve constant-time pointer manipulations, the amortized time for this operation remains constant.
 \[
-T_{\text{decrease\_key}} = O(1)
+  T_{\text{decrease\_key}} = O(1)
 \]
 
 Fibonacci Heaps achieve remarkable theoretical efficiency, particularly for algorithms like Dijkstra’s, where \texttt{decrease\_key} is frequent. The overall complexity improves to:
 \[
-T(V, E) = O(E + V \log V)
+  T(V, E) = O(E + V \log V)
 \]
-This is better than the $O(E \log V)$ bound of Binary Heaps.  
+This is better than the $O(E \log V)$ bound of Binary Heaps.
 
 \subsubsection*{Space Complexity}
 The space usage of a Fibonacci Heap is primarily determined by the number of nodes and the auxiliary pointers stored in its tree structure. Each node maintains:
@@ -178,7 +178,7 @@ The space usage of a Fibonacci Heap is primarily determined by the number of nod
 
 Every node therefore requires a constant amount of additional metadata. Since the total number of nodes in the heap is $n$, the space complexity is linear:
 \[
-S(n) = O(n)
+  S(n) = O(n)
 \]
 
 The consolidation process during \texttt{extract\_min} temporarily requires an auxiliary array of size $O(\log n)$ to store pointers to trees grouped by degree. However, this memory is negligible compared to the $O(n)$ main structure and does not affect the overall asymptotic bound.
@@ -188,9 +188,9 @@ In summary, Fibonacci Heaps trade increased constant-factor memory usage for imp
 \vspace{1em}
 Fibonacci Heaps provide excellent theoretical performance, especially for algorithms such as Dijkstra’s where the \texttt{decrease\_key} operation is frequent. Their asymptotic running time of
 \[
-T(V, E) = O(E + V \log V)
+  T(V, E) = O(E + V \log V)
 \]
-improves on the $O(E \log V)$ bound achieved with Binary Heaps.  
+improves on the $O(E \log V)$ bound achieved with Binary Heaps.
 Despite these advantages, Fibonacci Heaps may not always outperform simpler structures in practice due to larger constant factors, more complex pointer manipulation, and higher memory overhead. As a result, they serve primarily as a theoretical benchmark for optimal priority queue behavior rather than a go-to practical choice for large-scale systems.
 
 \subsection{Radix Heap}
@@ -208,43 +208,94 @@ Figure~\ref{fig:radixheap} illustrates an example of a Radix Heap after several 
 \end{figure}
 
 \subsubsection*{Insertion}
-To insert a key, the heap determines the appropriate bucket by comparing the key with the current bucket boundaries. Each bucket represents a range $[b_i, b_{i+1})$ that grows exponentially.  
+To insert a key, the heap determines the appropriate bucket by comparing the key with the current bucket boundaries. Each bucket represents a range $[b_i, b_{i+1})$ that grows exponentially.
 Since determining the correct bucket requires only a small number of comparisons (typically $O(\log C)$ where $C$ is the maximum key), insertion is very efficient:
 \[
-T_{\text{insert}} = O(\log C).
+  T_{\text{insert}} = O(\log C).
 \]
 
 \subsubsection*{Extract\_Min}
-When extracting the minimum key, the heap first inspects the smallest bucket (bucket 0). If it is empty, the heap must ``refill'' it by finding the next non-empty bucket, identifying its minimum key, updating the bucket ranges, and redistributing its contents.  
+When extracting the minimum key, the heap first inspects the smallest bucket (bucket 0). If it is empty, the heap must ``refill'' it by finding the next non-empty bucket, identifying its minimum key, updating the bucket ranges, and redistributing its contents.
 Although this refill step may seem expensive, it occurs only when necessary and each element is moved to a lower bucket only a small number of times. Amortized over all operations, this yields:
 \[
-T_{\text{extract\_min}} = O(\log C).
+  T_{\text{extract\_min}} = O(\log C).
 \]
 
 \subsubsection*{decrease\_Key}
 The \texttt{decrease\_key} operation inserts a new smaller key for an existing element while marking the old entry as stale (lazy deletion). Since the new key can only move to a bucket of lower or equal index, the operation remains efficient:
 \[
-T_{\text{decrease\_key}} = O(\log C).
+  T_{\text{decrease\_key}} = O(\log C).
 \]
 
 \subsubsection*{Space Complexity}
 A Radix Heap stores all elements inside a fixed number of buckets, where the number of buckets is:
 \[
-B = \lfloor \log_2 C \rfloor + 2,
+  B = \lfloor \log_2 C \rfloor + 2,
 \]
-with $C$ being the maximum possible key.  
+with $C$ being the maximum possible key.
 Each element appears only once (aside from lazily deleted stale entries), and the bucket list itself is of logarithmic size. Thus, the overall space usage is linear in the number of elements:
 \[
-S(n) = O(n).
+  S(n) = O(n).
 \]
 
 \vspace{1em}
 Radix Heaps offer particularly strong practical performance for Dijkstra’s algorithm when edge weights are small to moderate integers. Their bucket-based organization avoids the pointer-heavy overhead of Fibonacci Heaps while outperforming Binary Heaps on monotone workloads. Although their theoretical complexity ($O(m + n \log C)$) depends on the key range, they often perform well on sparse graphs with bounded edge weights.
 
-\subsection{BiDirectional Skewness}
+\subsection{Bidirectional Dijkstra}
+Bidirectional Dijkstra~\cite{bidirectional} is an optimization of the standard Dijkstra algorithm that executes two simultaneous searches: a \textbf{forward search} from the source node and a \textbf{backward search} from the target node. The algorithm terminates when the two search frontiers meet, often significantly reducing the number of visited nodes compared to the standard, unidirectional search.
+
+\subsubsection*{Search Strategy}
+In a standard Dijkstra search, the explored area expands as a circle centered at the source. If the target is at distance $r$, the search visits approximately $\pi r^2$ nodes. In contrast, Bidirectional Dijkstra expands two smaller circles of radius $r/2$, visiting approximately $2 \times \pi (r/2)^2 = \pi r^2 / 2$ nodes, potentially halving the search space.
+
+\subsubsection*{Skewed Expansion} \label{sec:skewed}
+Standard bidirectional search typically alternates between the forward and backward heaps in a round-robin order (1:1). However, this may be inefficient if one frontier expands into a sparse region while the other is stuck in a dense one.
+\textbf{Skewed Bidirectional Dijkstra} addresses this by dynamically balancing the search. The direction of expansion is chosen based on the relative sizes of the priority queues:
+\[
+  |Q_{f}| \cdot (1 - \sigma) \le |Q_{b}| \cdot \sigma
+\]
+where $|Q_{f}|$ and $|Q_{b}|$ are the sizes of the forward and backward heaps, and $\sigma \in [0, 1]$ is a skew parameter.
+\begin{itemize}
+  \item $\sigma = 0.5$: Balanced expansion (expands the smaller frontier).
+  \item $\sigma < 0.5$: Biased towards backward expansion.
+  \item $\sigma > 0.5$: Biased towards forward expansion.
+\end{itemize}
+This heuristic tries to keep the search frontiers balanced in terms of cost rather than just distance.
+
+\subsubsection*{Termination}
+The algorithm maintains a value $\mu$, representing the shortest path distance found so far connecting the two search trees. The search terminates when the sum of the minimum keys from both heaps exceeds $\mu$:
+\[
+  \min(Q_f) + \min(Q_b) \ge \mu
+\]
+At this point, no shorter path can exist, and $\mu$ is returned as the optimal distance.
+
+\subsection{Contraction Hierarchies}
+\textbf{Contraction Hierarchies (CH)}~\cite{contraction} is a speed-up technique designed for static road networks. It relies on a computationally expensive \textbf{preprocessing phase} to accelerate the following \textbf{query phases}. The core idea is to create a hierarchy of nodes where queries only need to visit nodes that are "more important" than the current node, minimizing the search space.
+
+\subsubsection*{Preprocessing Phase} \label{sec:contraction_preprocessing}
+The preprocessing phase orders all nodes by "importance" and iteratively \textbf{contracts} them. Contracting a node $u$ involves removing it from the graph and adding \textbf{shortcuts} between its neighbors $\{v_i\}$ to preserve shortest path distances. A shortcut $(v_i, v_j)$ with weight $w(v_i, u) + w(u, v_j)$ is added if the path through $u$ is the unique shortest path between $v_i$ and $v_j$.
+
+The importance of a node is determined using a heuristic that penalizes adding too many shortcuts:
+\[
+  I(u) = (\text{Shortcuts Added}) - (\text{Edges Removed}) + (\text{Contracted Neighbors})
+\]
+Nodes are contracted in increasing order of importance (from least to most important). This process effectively pushes local, unimportant nodes (like residential streets) to the bottom of the hierarchy, while major hubs remain at the top.
+
+\subsubsection*{Query Phase}
+The query phase executes a bidirectional Dijkstra search on the augmented graph (original edges + shortcuts), but with a strict rank constraint:
+\begin{itemize}
+  \item \textbf{Forward Search:} Only relaxes edges $(u, v)$ where $\text{rank}(u) < \text{rank}(v)$.
+  \item \textbf{Backward Search:} Only relaxes edges $(u, v)$ in the reverse graph where $\text{rank}(u) < \text{rank}(v)$.
+\end{itemize}
+This "upward-only" search strategy ensures that the algorithm quickly ascends the hierarchy, ignoring the majority of low-ranking nodes. The forward and backward searches meet at the node with the highest rank on the shortest path.
+
+\subsubsection*{Complexity}
+\begin{itemize}
+  \item \textbf{Preprocessing:} Heuristic but typically takes many minutes for millions of nodes.
+  \item \textbf{Query:} Extremely fast, often sub-millisecond on road networks, as the search space is reduced from millions of nodes to just a few hundred or thousand.
+\end{itemize}
 
 \section{Methodology}
-All three heaps, Binary, Radix, and Fibonacci, were implemented entirely in \textbf{Python 3} from scratch.  
+All three heaps, Binary, Radix, and Fibonacci, were implemented entirely in \textbf{Python 3} from scratch.
 Each heap defines a consistent interface to support Dijkstra’s algorithm, ensuring fair benchmarking and identical algorithmic behavior across all data structures.
 
 Each heap class implements the following core methods:
@@ -261,11 +312,38 @@ dijkstra(graph, source, heap_type="binary")
 
 This modular design allows the same Dijkstra function to operate seamlessly with any heap type, enabling controlled comparisons of performance and runtime behavior under identical conditions.
 
+\subsection{Algorithm Implementation}
+Beyond the standard Dijkstra implementation, we developed specialized classes for the advanced algorithms.
+
+\subsubsection{Bidirectional Dijkstra}
+The \texttt{BidirectionalDijkstra} class manages two separate priority queues, \texttt{f\_heap} and \texttt{b\_heap}, with corresponding distance dictionaries \texttt{f\_dist} and \texttt{b\_dist}.
+To support skewed expansion, the algorithm dynamically selects which frontier to expand based on the skew parameter $\sigma$, as described in section \ref{sec:skewed}. The decision logic is implemented as:
+\[
+  \text{len}(Q_f) \times (1 - \sigma) \le \text{len}(Q_b) \times \sigma
+\]
+This allows the search to prioritize the smaller frontier or bias towards one direction. The search terminates when the sum of the minimum keys from both heaps exceeds the shortest path found so far ($\mu$):
+\[
+  \min(Q_f) + \min(Q_b) \ge \mu
+\]
+
+\subsubsection{Contraction Hierarchies}
+The \texttt{ContractionHierarchy} class is divided into two distinct phases: preprocessing and querying.
+
+\paragraph{Preprocessing}
+The \texttt{preprocess()} method iteratively contracts nodes based on their importance. Importance is calculated dynamically using the heuristic discussed in section \ref{sec:contraction_preprocessing}:
+\[
+  I(u) = \text{shortcuts\_added} - \text{edges\_removed} + \text{contracted\_neighbors}
+\]
+To determine if a shortcut is necessary between two neighbors $u$ and $v$ when contracting node $w$, the algorithm runs a local search (\texttt{\_local\_dijkstra}) to check if an alternative path exists that is shorter than or equal to the path through $w$.
+
+\paragraph{Querying}
+The \texttt{query()} method executes a modified bidirectional Dijkstra search. It enforces the rank property by only relaxing edges $(u, v)$ where $\text{rank}(u) < \text{rank}(v)$ in the forward search, and similarly in the reverse graph for the backward search. This ensures the search space is restricted to the "upward" path in the hierarchy.
+
 \subsection{Graph Generation}
 To evaluate scalability and performance across different heap implementations, large directed weighted graphs were generated using custom functions implemented in \texttt{graph\_generator.py}. Each graph is represented using a standard adjacency-list format:
 
 \[
-G = \{\, u : [(v, w)], \ldots \,\},
+  G = \{\, u : [(v, w)], \ldots \,\},
 \]
 
 where each node \(u\) maps to a list of outgoing edges \((v, w)\), with weights \(w\) sampled uniformly from \([1, 10]\).
@@ -279,7 +357,7 @@ Two different random graph models were implemented:
 \end{itemize}
 
 \subsubsection*{Choice of Graph Model for Experiments}
-While both ER and BA generators were implemented, the full experimental evaluation uses the \textbf{ER model} exclusively.  
+While both ER and BA generators were implemented, the full experimental evaluation uses the \textbf{ER model} exclusively.
 The BA model becomes computationally expensive at large scales (hundreds of thousands to millions of nodes) due to the need to maintain and repeatedly sample from a dynamically weighted degree distribution. On typical hardware, generating BA graphs of size comparable to ER graphs can take several minutes to hours.
 
 Thus, BA graphs were used only for smaller exploratory tests, while all large-scale benchmarking relies on ER graphs for consistent generation speed and reproducibility.
@@ -288,7 +366,7 @@ Thus, BA graphs were used only for smaller exploratory tests, while all large-sc
 For each experiment, the number of edges was selected using:
 
 \[
-E \approx (\text{avg\_edges\_per\_node}) \times V,
+  E \approx (\text{avg\_edges\_per\_node}) \times V,
 \]
 
 yielding sparse graphs suitable for evaluating shortest-path algorithms. Progress bars were displayed using \texttt{tqdm}~\cite{tqdm} during large-scale generation.
@@ -296,125 +374,125 @@ yielding sparse graphs suitable for evaluating shortest-path algorithms. Progres
 The main experimental dataset consists of ER graphs of the following sizes:
 
 \begin{itemize}
-    \item 10K nodes → $\approx$80K edges
-    \item 50K nodes → $\approx$500K edges
-    \item 100K nodes → $\approx$1.2M edges
-    \item 500K nodes → $\approx$7.5M edges
-    \item 1M nodes → $\approx$20M edges
-    \item 2M nodes → $\approx$50M edges  
+  \item 10K nodes → $\approx$80K edges
+  \item 50K nodes → $\approx$500K edges
+  \item 100K nodes → $\approx$1.2M edges
+  \item 500K nodes → $\approx$7.5M edges
+  \item 1M nodes → $\approx$20M edges
+  \item 2M nodes → $\approx$50M edges
 \end{itemize}
 
 Larger ER graphs beyond 2 million nodes were not tested due to hardware constraints, specifically, the system’s 16GB memory capacity and the significant runtime required for dense graphs at that scale. Each ER graph was processed with all three heap-based Dijkstra variants to compare runtime, memory usage, and scalability trends.
 
 \section{Results}
-All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both \textbf{runtime} and \textbf{peak memory usage} were recorded for each heap implementation using 
+All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both \textbf{runtime} and \textbf{peak memory usage} were recorded for each heap implementation using
 wall-clock time and Python’s \texttt{tracemalloc} module, respectively. Each experiment was repeated twice to ensure consistency and reduce noise from background processes.
 
 \begin{table}[H]
-\centering
-\caption{Runtime comparison of Dijkstra’s Algorithm using Binary, Radix, and Fibonacci Heaps across two runs.}
-\label{tab:runtimes}
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
-\midrule
-Binary Heap     
-& Run 1 & 0.16s & 0.94s & 2.18s & 14.27s & 31.81s & 139.65s \\
-& Run 2 & 0.15s & 0.91s & 2.12s & 14.40s & 32.08s & 135.93s \\
-\midrule
-Radix Heap      
-& Run 1 & 0.13s & 1.00s & 2.50s & 18.03s & 44.03s & 214.22s \\
-& Run 2 & 0.12s & 1.01s & 2.50s & 17.94s & 43.96s & 274.35s \\
-\midrule
-Fibonacci Heap  
-& Run 1 & 0.14s & 0.68s & 1.51s & 9.58s & 22.03s & 57.85s \\
-& Run 2 & 0.13s & 0.64s & 1.52s & 9.83s & 21.94s & 154.22s \\
-\bottomrule
-\end{tabular}
+  \centering
+  \caption{Runtime comparison of Dijkstra’s Algorithm using Binary, Radix, and Fibonacci Heaps across two runs.}
+  \label{tab:runtimes}
+  \begin{tabular}{lccccccc}
+    \toprule
+    \textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+    \midrule
+    Binary Heap
+                       & Run 1        & 0.16s        & 0.94s        & 2.18s         & 14.27s        & 31.81s      & 139.65s     \\
+                       & Run 2        & 0.15s        & 0.91s        & 2.12s         & 14.40s        & 32.08s      & 135.93s     \\
+    \midrule
+    Radix Heap
+                       & Run 1        & 0.13s        & 1.00s        & 2.50s         & 18.03s        & 44.03s      & 214.22s     \\
+                       & Run 2        & 0.12s        & 1.01s        & 2.50s         & 17.94s        & 43.96s      & 274.35s     \\
+    \midrule
+    Fibonacci Heap
+                       & Run 1        & 0.14s        & 0.68s        & 1.51s         & 9.58s         & 22.03s      & 57.85s      \\
+                       & Run 2        & 0.13s        & 0.64s        & 1.52s         & 9.83s         & 21.94s      & 154.22s     \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 
 \begin{figure}[H]
-\centering
-\begin{subfigure}{0.48\linewidth}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/runtime_comparison_1.png}
     \caption{Runtime (Run 1)}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\linewidth}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/runtime_comparison_2.png}
     \caption{Runtime (Run 2)}
-\end{subfigure}
-\caption{Normal runtime comparison across heap types for Run 1 and Run 2.}
-\label{fig:runtime-normal}
+  \end{subfigure}
+  \caption{Normal runtime comparison across heap types for Run 1 and Run 2.}
+  \label{fig:runtime-normal}
 \end{figure}
 
 \begin{figure}[H]
-\centering
-\begin{subfigure}{0.48\linewidth}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/runtime_comparison_log_1.png}
     \caption{Log-scale Runtime (Run 1)}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\linewidth}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/runtime_comparison_log_2.png}
     \caption{Log-scale Runtime (Run 2)}
-\end{subfigure}
-\caption{Log-scale runtime comparison across heap types for Run 1 and Run 2.}
-\label{fig:runtime-log}
+  \end{subfigure}
+  \caption{Log-scale runtime comparison across heap types for Run 1 and Run 2.}
+  \label{fig:runtime-log}
 \end{figure}
 
 \begin{table}[H]
-\centering
-\caption{Peak memory usage (MiB) during Dijkstra’s Algorithm for each heap implementation across two runs.}
-\label{tab:memory}
-\begin{tabular}{lccccccc}
-\toprule
-\textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
-\midrule
-Binary Heap     
-& Run 1 & 1.14 & 9.20 & 18.96 & 79.30 & 160.08 & 321.93 \\
-& Run 2 & 1.14 & 9.20 & 18.96 & 79.30 & 160.08 & 321.93 \\
-\midrule
-Radix Heap      
-& Run 1 & 1.60 & 11.76 & 25.86 & 152.86 & 319.40 & 579.09 \\
-& Run 2 & 1.60 & 11.76 & 25.86 & 152.86 & 319.40 & 579.09 \\
-\midrule
-Fibonacci Heap  
-& Run 1 & 1.37 & 10.53 & 21.72 & 91.63 & 185.27 & 375.67 \\
-& Run 2 & 1.37 & 10.53 & 21.72 & 91.63 & 185.27 & 375.67 \\
-\bottomrule
-\end{tabular}
+  \centering
+  \caption{Peak memory usage (MiB) during Dijkstra’s Algorithm for each heap implementation across two runs.}
+  \label{tab:memory}
+  \begin{tabular}{lccccccc}
+    \toprule
+    \textbf{Heap Type} & \textbf{Run} & \textbf{10K} & \textbf{50K} & \textbf{100K} & \textbf{500K} & \textbf{1M} & \textbf{2M} \\
+    \midrule
+    Binary Heap
+                       & Run 1        & 1.14         & 9.20         & 18.96         & 79.30         & 160.08      & 321.93      \\
+                       & Run 2        & 1.14         & 9.20         & 18.96         & 79.30         & 160.08      & 321.93      \\
+    \midrule
+    Radix Heap
+                       & Run 1        & 1.60         & 11.76        & 25.86         & 152.86        & 319.40      & 579.09      \\
+                       & Run 2        & 1.60         & 11.76        & 25.86         & 152.86        & 319.40      & 579.09      \\
+    \midrule
+    Fibonacci Heap
+                       & Run 1        & 1.37         & 10.53        & 21.72         & 91.63         & 185.27      & 375.67      \\
+                       & Run 2        & 1.37         & 10.53        & 21.72         & 91.63         & 185.27      & 375.67      \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 \begin{figure}[H]
-\centering
-\begin{subfigure}{0.48\linewidth}
+  \centering
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/memory_comparison_1.png}
     \caption{Memory Usage (Run 1)}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\linewidth}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\linewidth}
     \centering
     \includegraphics[width=\linewidth]{plots/memory_comparison_2.png}
     \caption{Memory Usage (Run 2)}
-\end{subfigure}
-\caption{Peak memory usage comparison across heap types for Run 1 and Run 2.}
-\label{fig:memory-usage}
+  \end{subfigure}
+  \caption{Peak memory usage comparison across heap types for Run 1 and Run 2.}
+  \label{fig:memory-usage}
 \end{figure}
 
 \section{Visualization}
 
-The visualization system uses the Pygame library to provide an interactive, real-time comparison of shortest path algorithms on a customizable grid-based graph. 
+The visualization system uses the Pygame library to provide an interactive, real-time comparison of shortest path algorithms on a customizable grid-based graph.
 
-Each algorithm is implemented as a Python generator that yields intermediate states at each iteration. The grid is represented as an $N \times N$ matrix of nodes, which is converted to an adjacency list for algorithm execution. During visualization, nodes are color-coded to reflect their state: orange for the start node, turquoise for the end, black for obstacles, red for visited nodes, green for frontier nodes, and purple for the final shortest path. This allows users to observe how each algorithm explores the search space differently—Dijkstra expands uniformly from the source, Bidirectional Dijkstra searches from both endpoints simultaneously, and Contraction Hierarchies shows very little exploration due to its preprocessing. For Contraction Hierarchies specifically, the visualization includes gold lines connecting nodes with shortcuts, demonstrating how the algorithm "jumps" across the graph using preprocessed edges before unpacking them into the complete path. 
+Each algorithm is implemented as a Python generator that yields intermediate states at each iteration. The grid is represented as an $N \times N$ matrix of nodes, which is converted to an adjacency list for algorithm execution. During visualization, nodes are color-coded to reflect their state: orange for the start node, turquoise for the end, black for obstacles, red for visited nodes, green for frontier nodes, and purple for the final shortest path. This allows users to observe how each algorithm explores the search space differently—Dijkstra expands uniformly from the source, Bidirectional Dijkstra searches from both endpoints simultaneously, and Contraction Hierarchies shows very little exploration due to its preprocessing. For Contraction Hierarchies specifically, the visualization includes gold lines connecting nodes with shortcuts, demonstrating how the algorithm "jumps" across the graph using preprocessed edges before unpacking them into the complete path.
 
-To provide accurate performance comparisons without visualization overhead, each algorithm runs twice: first non-visually to capture timing metrics, then as a generator for step-by-step rendering. The system supports command-line configuration of grid size and heap type (binary, Fibonacci, or radix), allowing users to easily compare different configurations. Users interact using mouse clicks to place walls and start/end nodes, with keyboard controls for algorithm selection and execution. Preset mazes and random wall generation allow for repeatable and rapid testing, respectively. 
+To provide accurate performance comparisons without visualization overhead, each algorithm runs twice: first non-visually to capture timing metrics, then as a generator for step-by-step rendering. The system supports command-line configuration of grid size and heap type (binary, Fibonacci, or radix), allowing users to easily compare different configurations. Users interact using mouse clicks to place walls and start/end nodes, with keyboard controls for algorithm selection and execution. Preset mazes and random wall generation allow for repeatable and rapid testing, respectively.
 
 This visualization tool serves as both an educational resource for understanding algorithmic behavior and a practical benchmarking environment to analyze performance for different graph structures.
 
@@ -435,10 +513,10 @@ The Binary Heap showed predictable and stable performance, with runtimes growing
 The Radix Heap, although theoretically promising for monotone integer priority workloads, consistently performed worse than both other heaps in these experiments. There are several reasons for this behavior:
 
 \begin{itemize}
-    \item \textbf{Bucket Redistribution Overhead:} Radix Heaps require periodic "refill" operations that scan bucket contents, recompute bucket boundaries, and reinsert elements. Although amortized complexity remains low, the constant cost of bucket redistribution is substantial in Python.
-    \item \textbf{Python Implementation Limitations:} The Radix Heap relies heavily on list operations, repeated scans, and dictionary lookups for stale-entry handling. These operations are significantly slower in Python than the pointer-based operations in Fibonacci Heaps.
-    \item \textbf{Large Key Range:} Since key ranges in dense Erdős–Rényi graphs grow rapidly as distances accumulate, the number of buckets increases (\(\lfloor \log_2 C \rfloor + 2\)). Larger bucket arrays lead to more redistribution work and more frequent boundary updates.
-    \item \textbf{High Memory Footprint:} The Radix Heap used nearly twice as much memory as the Binary Heap, leading to poorer cache locality and additional overhead during Python’s memory management cycles.
+  \item \textbf{Bucket Redistribution Overhead:} Radix Heaps require periodic "refill" operations that scan bucket contents, recompute bucket boundaries, and reinsert elements. Although amortized complexity remains low, the constant cost of bucket redistribution is substantial in Python.
+  \item \textbf{Python Implementation Limitations:} The Radix Heap relies heavily on list operations, repeated scans, and dictionary lookups for stale-entry handling. These operations are significantly slower in Python than the pointer-based operations in Fibonacci Heaps.
+  \item \textbf{Large Key Range:} Since key ranges in dense Erdős–Rényi graphs grow rapidly as distances accumulate, the number of buckets increases (\(\lfloor \log_2 C \rfloor + 2\)). Larger bucket arrays lead to more redistribution work and more frequent boundary updates.
+  \item \textbf{High Memory Footprint:} The Radix Heap used nearly twice as much memory as the Binary Heap, leading to poorer cache locality and additional overhead during Python’s memory management cycles.
 \end{itemize}
 
 These factors explain why the Radix Heap, despite excellent performance in low-level languages like C or C++, performs less favorably in Python. In this environment, the higher constant factors overshadow its theoretical monotone advantages.
@@ -454,14 +532,13 @@ Overall, the experiments highlight that while theoretical bounds are informative
 \section{Conclusion}
 
 \section*{GitHub Repository}
-The full implementation (data structures, Dijkstra’s algorithm, unit tests, and benchmark plots) is available at:  
+The full implementation (data structures, algorithms, unit tests, visualization, and benchmark plots) is available at:
 \url{https://github.com/aaravg31/shortest_path_comparison}
 
 \section*{Acknowledgements}
-We would like to acknowledge ChatGPT \cite{chatgpt} for assistance with code explanations, debugging, and report language refinement.
+We would like to acknowledge the use of ChatGPT \cite{chatgpt} for assisting with documentation, debugging, and report language refinement.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
 
 \end{document}
-
