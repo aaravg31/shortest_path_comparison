@@ -1,23 +1,28 @@
 """
-Runtime Benchmark: Dijkstra's Algorithm with Different Heaps
+Runtime Benchmark: Dijkstra vs Bidirectional Dijkstra with Different Heaps
 
-Compares performance of BinaryHeap, RadixHeap, and FibonacciHeap
-on randomly generated sparse graphs of increasing size.
+Compares performance (runtime + peak memory) of:
+- Standard Dijkstra
+- Bidirectional Dijkstra with skewness
+
+Each variant is tested with three heap implementations:
+- BinaryHeap
+- RadixHeap
+- FibonacciHeap
 
 Outputs
 -------
-- Console table of runtimes (seconds) and peak memory (MiB)
-- Matplotlib line chart: runtime vs number of nodes
-- Matplotlib line chart: peak memory vs number of nodes
-- Saved PNG plots:
-    - "latex/plots/runtime_comparison.png"
-    - "latex/plots/memory_comparison.png"
+- Console timings + peak memory
+- Matplotlib line charts (runtime, log-runtime, memory),
+  each containing ALL curves (Dijkstra + Bidirectional).
 
 Notes
 -----
-- Uses tqdm (from util.graph_generator) for progress tracking.
+- Uses tqdm progress bars from graph_generator.
 - Graphs are directed with random positive weights.
-- Memory usage is measured with tracemalloc, which works on macOS.
+- For graphs up to 500,000 nodes: each (algorithm, heap) combo is run 3 times
+  and averaged.
+- For larger graphs: each combo is run once (to keep total runtime manageable).
 """
 
 import time
@@ -25,16 +30,56 @@ import tracemalloc
 import matplotlib.pyplot as plt
 
 from src.algorithms.dijkstra import dijkstra
+from src.algorithms.bidirectional_skewed import BidirectionalDijkstra
 from src.utils.graph_generator import generate_er_graph, generate_ba_graph
 
 
-def benchmark_dijkstra():
-    """Run Dijkstra on multiple graph sizes and heap types, record runtimes and peak memory."""
-    heap_types = ["binary", "radix", "fibonacci"]
+ALGORITHMS = ["dijkstra", "bidirectional"]
+HEAP_TYPES = ["binary", "radix", "fibonacci"]
 
+
+def _run_algorithm(alg: str, heap_type: str, graph, source: int, target: int):
+    """
+    Run one algorithm/heap combo with tracemalloc.
+    Returns (runtime_seconds, peak_memory_MiB).
+    """
+    tracemalloc.start()
+    start = time.perf_counter()
+
+    if alg == "dijkstra":
+        dijkstra(graph, source, heap_type=heap_type)
+
+    elif alg == "bidirectional":
+        bd = BidirectionalDijkstra(graph, heap_type=heap_type, skew=0.5)
+        bd.find_shortest_path(source, target)
+
+    else:
+        raise ValueError(f"Unknown algorithm: {alg}")
+
+    end = time.perf_counter()
+    current, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    runtime = end - start
+    peak_mib = peak / (1024 * 1024)
+    return runtime, peak_mib
+
+
+def benchmark_all():
+    """
+    Run Dijkstra and Bidirectional Dijkstra with all heap types on multiple
+    graph sizes.
+
+    For num_nodes <= 500,000: run each combo 3 times and average.
+    For num_nodes > 500,000: run once.
+
+    Returns
+    -------
+    graph_sizes : list[(num_nodes, avg_edges)]
+    time_results : dict[alg][heap] -> [avg runtimes...]
+    mem_results  : dict[alg][heap] -> [avg peak MiB...]
+    """
     # Graph sizes: (num_nodes, avg_edges_per_node)
-    # For peer review testing:
-    # Use smaller graphs first if runtime or memory is limited (uncomment and comment sizes accordingly):
     graph_sizes = [
         (10_000, 8),
         (50_000, 10),
@@ -44,129 +89,199 @@ def benchmark_dijkstra():
         (2_000_000, 25),
     ]
 
-    # Store results per heap type
-    time_results = {heap: [] for heap in heap_types}
-    mem_results = {heap: [] for heap in heap_types}
+    time_results = {
+        alg: {heap: [] for heap in HEAP_TYPES} for alg in ALGORITHMS
+    }
+    mem_results = {
+        alg: {heap: [] for heap in HEAP_TYPES} for alg in ALGORITHMS
+    }
+
+    alg_labels = {
+        "dijkstra": "Dijkstra",
+        "bidirectional": "Bidirectional Dijkstra (Skewed Search)",
+    }
 
     for num_nodes, avg_edges in graph_sizes:
         approx_edges = avg_edges * num_nodes
-        print(f"\n🔹 Benchmarking graph with {num_nodes} nodes and ~{approx_edges} edges")
+        repeats = 3 if num_nodes <= 500_000 else 1
+
+        print(
+            f"\n🔹 Benchmarking graph with {num_nodes} nodes and "
+            f"~{approx_edges} edges ({repeats} run(s) per configuration)"
+        )
 
         # ----- Choose graph generator here -----
-        # Option 1: Erdos–Rényi style random graph
-        graph = generate_er_graph(num_nodes, approx_edges, seed=42, show_progress=True)
+        # Option 1: Erdos–Rényi style random graph (used in final experiments)
+        graph = generate_er_graph(
+            num_nodes, approx_edges, seed=42, show_progress=True
+        )
 
         # Option 2: Barabási–Albert preferential attachment graph
-        # To use BA instead, comment out the line above and uncomment this:
-        # graph = generate_ba_graph(num_nodes, m=avg_edges, seed=42, show_progress=True)
+        # graph = generate_ba_graph(
+        #     num_nodes, m=avg_edges, seed=42, show_progress=True
+        # )
 
-        # Run Dijkstra for each heap type
-        for heap_type in heap_types:
-            print(f"   ▶ Running Dijkstra with {heap_type.title()} Heap...", end=" ", flush=True)
+        source = 0
+        target = num_nodes - 1
 
-            # Start memory tracking
-            tracemalloc.start()
+        for alg in ALGORITHMS:
+            print(f"\n   ▶ {alg_labels[alg]} variant:")
+            for heap_type in HEAP_TYPES:
+                total_time = 0.0
+                total_peak = 0.0
 
-            start = time.perf_counter()
-            dijkstra(graph, source=0, heap_type=heap_type)
-            end = time.perf_counter()
+                for r in range(repeats):
+                    print(
+                        f"      - {heap_type.title()} Heap "
+                        f"(run {r+1}/{repeats})...",
+                        end=" ",
+                        flush=True,
+                    )
+                    runtime, peak_mib = _run_algorithm(
+                        alg, heap_type, graph, source, target
+                    )
+                    total_time += runtime
+                    total_peak += peak_mib
+                    print(f"done in {runtime:.2f}s (peak ~{peak_mib:.2f} MiB)")
 
-            # Capture memory usage (current, peak) in bytes
-            current, peak = tracemalloc.get_traced_memory()
-            tracemalloc.stop()
+                avg_time = total_time / repeats
+                avg_peak = total_peak / repeats
 
-            runtime = end - start
-            peak_mib = peak / (1024 * 1024)  # convert to MiB
+                time_results[alg][heap_type].append(avg_time)
+                mem_results[alg][heap_type].append(avg_peak)
 
-            time_results[heap_type].append(runtime)
-            mem_results[heap_type].append(peak_mib)
-
-            print(f"done in {runtime:.2f}s (peak ~{peak_mib:.2f} MiB)")
+                if repeats > 1:
+                    print(
+                        f"        ↳ Avg over {repeats} runs: "
+                        f"{avg_time:.2f}s, peak ~{avg_peak:.2f} MiB"
+                    )
 
     return graph_sizes, time_results, mem_results
 
 
-def plot_results(graph_sizes, time_results, mem_results):
-    """Plot runtime and peak memory vs graph size for each heap with custom colors."""
+def plot_all(graph_sizes, time_results, mem_results):
+    """
+    Generate 3 plots, each containing all curves:
+    - Runtime vs nodes (linear) for Dijkstra + Bidirectional
+    - Runtime vs nodes (log scale) for Dijkstra + Bidirectional
+    - Peak memory vs nodes for Dijkstra + Bidirectional
+
+    Dijkstra curves use cool color tones; Bidirectional curves use warm tones.
+    """
     x = [n for n, _ in graph_sizes]
 
-    colors = {
-        "binary": "#1f77b4",
-        "radix": "#e377c2",
-        "fibonacci": "#9467bd",
-    }
-    
-    colors_2 = {
-        "binary": "#800000",
-        "radix":  "#CC3333", 
-        "fibonacci": "#FF8C00",
+    # Cool color palette (for Dijkstra)
+    cool_colors = {
+        "binary": "#1f77b4",   # blue
+        "radix": "#e377c2",    # magenta
+        "fibonacci": "#9467bd" # purple
     }
 
-    # --- Runtime (linear) ---
+    # Warm color palette (for Bidirectional)
+    warm_colors = {
+        "binary": "#ff7f0e",   # orange
+        "radix": "#d62728",    # red
+        "fibonacci": "#ff8c00" # dark orange
+    }
+
+    # ---------- Runtime (linear) ----------
     plt.figure(figsize=(8, 5))
-    for heap_type, runtimes in time_results.items():
+    for heap_type in HEAP_TYPES:
+        # Dijkstra
         plt.plot(
             x,
-            runtimes,
+            time_results["dijkstra"][heap_type],
             marker="o",
-            label=f"{heap_type.title()} Heap",
-            color=colors.get(heap_type, None),
+            label=f"Dijkstra - {heap_type.title()} Heap",
+            color=cool_colors.get(heap_type),
+            linewidth=2,
+        )
+        # Bidirectional
+        plt.plot(
+            x,
+            time_results["bidirectional"][heap_type],
+            marker="s",
+            linestyle="--",
+            label=f"Bidirectional - {heap_type.title()} Heap",
+            color=warm_colors.get(heap_type),
             linewidth=2,
         )
 
     plt.xlabel("Number of Nodes")
     plt.ylabel("Runtime (seconds)")
-    plt.title("Dijkstra Runtime Comparison: Different Heaps (Linear Scale)")
+    plt.title("Runtime Comparison: Dijkstra vs Bidirectional Dijkstra (Linear Scale)")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
-    plt.savefig("latex/plots/runtime_comparison.png", dpi=300)
+    plt.savefig("latex/plots/dijkstra_vs_bidijkstra_runtime_linear.png", dpi=300)
     plt.show()
-    
-     # --- Runtime (log scale) ---
+
+    # ---------- Runtime (log scale) ----------
     plt.figure(figsize=(8, 5))
-    for heap_type, runtimes in time_results.items():
+    for heap_type in HEAP_TYPES:
+        # Dijkstra
         plt.plot(
             x,
-            runtimes,
+            time_results["dijkstra"][heap_type],
             marker="o",
-            label=f"{heap_type.title()} Heap",
-            color=colors.get(heap_type, None),
+            label=f"Dijkstra - {heap_type.title()} Heap",
+            color=cool_colors.get(heap_type),
+            linewidth=2,
+        )
+        # Bidirectional
+        plt.plot(
+            x,
+            time_results["bidirectional"][heap_type],
+            marker="s",
+            linestyle="--",
+            label=f"Bidirectional - {heap_type.title()} Heap",
+            color=warm_colors.get(heap_type),
             linewidth=2,
         )
 
-    plt.yscale("log")
     plt.xlabel("Number of Nodes")
     plt.ylabel("Runtime (seconds, log scale)")
-    plt.title("Dijkstra Runtime Comparison: Different Heaps (Log Scale)")
+    plt.title("Runtime Comparison: Dijkstra vs Bidirectional Dijkstra (Log Scale)")
+    plt.yscale("log")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
-    plt.savefig("latex/plots/runtime_comparison_log.png", dpi=300)
+    plt.savefig("latex/plots/dijkstra_vs_bidijkstra_runtime_log.png", dpi=300)
     plt.show()
 
-    # --- Memory plot ---
+    # ---------- Memory (linear) ----------
     plt.figure(figsize=(8, 5))
-    for heap_type, peaks in mem_results.items():
+    for heap_type in HEAP_TYPES:
+        # Dijkstra
         plt.plot(
             x,
-            peaks,
+            mem_results["dijkstra"][heap_type],
             marker="o",
-            label=f"{heap_type.title()} Heap",
-            color=colors_2.get(heap_type, None),
+            label=f"Dijkstra - {heap_type.title()} Heap",
+            color=cool_colors.get(heap_type),
+            linewidth=2,
+        )
+        # Bidirectional
+        plt.plot(
+            x,
+            mem_results["bidirectional"][heap_type],
+            marker="s",
+            linestyle="--",
+            label=f"Bidirectional - {heap_type.title()} Heap",
+            color=warm_colors.get(heap_type),
             linewidth=2,
         )
 
     plt.xlabel("Number of Nodes")
     plt.ylabel("Peak Memory (MiB)")
-    plt.title("Dijkstra Peak Memory Comparison: Different Heaps")
+    plt.title("Peak Memory Comparison: Dijkstra vs Bidirectional Dijkstra")
     plt.legend()
     plt.grid(True, linestyle="--", alpha=0.6)
     plt.tight_layout()
-    plt.savefig("latex/plots/memory_comparison.png", dpi=300)
+    plt.savefig("latex/plots/dijkstra_vs_bidijkstra_memory.png", dpi=300)
     plt.show()
 
 
 if __name__ == "__main__":
-    sizes, time_results, mem_results = benchmark_dijkstra()
-    plot_results(sizes, time_results, mem_results)
+    sizes, time_res, mem_res = benchmark_all()
+    plot_all(sizes, time_res, mem_res)
