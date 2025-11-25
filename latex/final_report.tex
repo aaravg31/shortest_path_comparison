@@ -271,7 +271,7 @@ At this point, no shorter path can exist, and $\mu$ is returned as the optimal d
 \subsection{Contraction Hierarchies}
 \textbf{Contraction Hierarchies (CH)}~\cite{contraction} is a speed-up technique designed for static road networks. It relies on a computationally expensive \textbf{preprocessing phase} to accelerate the following \textbf{query phases}. The core idea is to create a hierarchy of nodes where queries only need to visit nodes that are "more important" than the current node, minimizing the search space.
 
-\subsubsection*{Preprocessing Phase}
+\subsubsection*{Preprocessing Phase} \label{sec:contraction_preprocessing}
 The preprocessing phase orders all nodes by "importance" and iteratively \textbf{contracts} them. Contracting a node $u$ involves removing it from the graph and adding \textbf{shortcuts} between its neighbors $\{v_i\}$ to preserve shortest path distances. A shortcut $(v_i, v_j)$ with weight $w(v_i, u) + w(u, v_j)$ is added if the path through $u$ is the unique shortest path between $v_i$ and $v_j$.
 
 The importance of a node is determined using a heuristic that penalizes adding too many shortcuts:
@@ -311,6 +311,33 @@ dijkstra(graph, source, heap_type="binary")
 \end{verbatim}
 
 This modular design allows the same Dijkstra function to operate seamlessly with any heap type, enabling controlled comparisons of performance and runtime behavior under identical conditions.
+
+\subsection{Algorithm Implementation}
+Beyond the standard Dijkstra implementation, we developed specialized classes for the advanced algorithms.
+
+\subsubsection{Bidirectional Dijkstra}
+The \texttt{BidirectionalDijkstra} class manages two separate priority queues, \texttt{f\_heap} and \texttt{b\_heap}, with corresponding distance dictionaries \texttt{f\_dist} and \texttt{b\_dist}.
+To support skewed expansion, the algorithm dynamically selects which frontier to expand based on the skew parameter $\sigma$, as described in section \ref{sec:skewed}. The decision logic is implemented as:
+\[
+  \text{len}(Q_f) \times (1 - \sigma) \le \text{len}(Q_b) \times \sigma
+\]
+This allows the search to prioritize the smaller frontier or bias towards one direction. The search terminates when the sum of the minimum keys from both heaps exceeds the shortest path found so far ($\mu$):
+\[
+  \min(Q_f) + \min(Q_b) \ge \mu
+\]
+
+\subsubsection{Contraction Hierarchies}
+The \texttt{ContractionHierarchy} class is divided into two distinct phases: preprocessing and querying.
+
+\paragraph{Preprocessing}
+The \texttt{preprocess()} method iteratively contracts nodes based on their importance. Importance is calculated dynamically using the heuristic discussed in section \ref{sec:contraction_preprocessing}:
+\[
+  I(u) = \text{shortcuts\_added} - \text{edges\_removed} + \text{contracted\_neighbors}
+\]
+To determine if a shortcut is necessary between two neighbors $u$ and $v$ when contracting node $w$, the algorithm runs a local search (\texttt{\_local\_dijkstra}) to check if an alternative path exists that is shorter than or equal to the path through $w$.
+
+\paragraph{Querying}
+The \texttt{query()} method executes a modified bidirectional Dijkstra search. It enforces the rank property by only relaxing edges $(u, v)$ where $\text{rank}(u) < \text{rank}(v)$ in the forward search, and similarly in the reverse graph for the backward search. This ensures the search space is restricted to the "upward" path in the hierarchy.
 
 \subsection{Graph Generation}
 To evaluate scalability and performance across different heap implementations, large directed weighted graphs were generated using custom functions implemented in \texttt{graph\_generator.py}. Each graph is represented using a standard adjacency-list format:
