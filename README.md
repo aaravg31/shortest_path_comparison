@@ -26,8 +26,8 @@ Our presentation can be found at ???
 
 ```
 shortest_path_comparison/
-├── src/
-│   ├── algorithms/
+├── src/                               # Source code
+│   ├── algorithms/                    # Algorithm implementations
 │   │   ├── dijkstra.py                # Standard Dijkstra with interchangeable heap backends
 │   │   ├── bidirectional_dijkstra.py  # Bidirectional Dijkstra implementation
 │   │   ├── bidirectional_skewed.py    # Bidirectional Dijkstra with skewness parameter
@@ -38,14 +38,15 @@ shortest_path_comparison/
 │   │   └── radix_heap.py
 │   ├── utils/
 │   │   ├── graph_generator.py         # Random directed graph generator
-│   │   └── benchmark_dijkstra.py      # Runtime analysis script
+│   │   └── benchmark_dijkstra.py      # Runtime analysis script for Dijkstra's algorithm
+│   │   └── benchmark_ch.py            # Runtime analysis script for Contraction Hierarchies
 │   └── visualization/                 # Interactive Pygame visualization
 │       ├── main.py                    # Main visualization loop and event handling
 │       ├── grid.py                    # Grid state management and rendering
 │       ├── visual_algorithms.py       # Generator-based visual algorithm wrappers
 │       └── presets.py                 # Preset grid configurations
 │
-├── unit_tests/
+├── unit_tests/                        # Unit tests for all implemented algorithms
 │   ├── test_binary_heap.py
 │   ├── test_fibonacci_heap.py
 │   ├── test_radix_heap.py
@@ -55,12 +56,12 @@ shortest_path_comparison/
 │   ├── test_contraction_hierarchy.py
 │   └── test_graph_generator.py
 │
-├── latex/                              # Final report materials (plots, tex files)
-│   └── plots/
+├── latex/                              # Final report materials (tex files, compiled pdf)
+│   └── plots/                          # Plots for final report
 │
-├── requirements.txt
-├── LICENSE
-└── README.md
+├── requirements.txt                    # Project dependencies
+├── LICENSE                             # Project license
+└── README.md                           # Project documentation
 ```
 
 ## Implementation Status
