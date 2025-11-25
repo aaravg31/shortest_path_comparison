@@ -18,6 +18,8 @@ The primary objectives are:
 
 The final report with further analysis and implementation details can be found at [/latex/final_report.pdf](/latex/final_report.pdf).
 
+A demo of the visualization tool can be found on YouTube at [https://youtu.be/A_zrF0KwM_s](https://youtu.be/A_zrF0KwM_s)
+
 Our presentation can be found at ???
 
 ## Repository Structure
