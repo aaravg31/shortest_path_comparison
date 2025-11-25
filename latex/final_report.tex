@@ -29,9 +29,7 @@
   \country{Canada}}
 
 \begin{abstract}
-  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
-
-    [UPDATE BASED ON RESULTS AND ABOUT CH]
+  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. We also introduce Contraction Hierarchies (CH), a hierarchical speed-up technique. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
 \end{abstract}
 
 \keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Graph Algorithms, Priority Queues}
@@ -56,7 +54,7 @@ This report examines and compares three priority queue data structures that can 
 
 In addition to these data structures, this project will also extend the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target.
 
-  [ADD ABOUT CH TOO AND BIDIRECTIONAL FOR ALL 3 HEAPS]
+Finally, we implement \textbf{Contraction Hierarchies}, a speed-up technique that relies on preprocessing the graph to create a hierarchy of nodes, allowing for extremely fast queries by ignoring unimportant nodes during the search.
 
 \vspace{1em}
 Overall, the goal of this project is to provide both a theoretical and empirical comparison of these structures and Dijkstra implementations, evaluating their runtime behavior, scalability, and memory characteristics when applied to large synthetic graphs.
@@ -465,6 +463,25 @@ All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. 
   \label{fig:memory_usage}
 \end{figure}
 
+
+\subsection{Contraction Hierarchies Results}
+Due to the high computational cost of the preprocessing phase in Python, Contraction Hierarchies were evaluated on smaller graph sizes. Table~\ref{tab:ch_results} illustrates the trade-off: while preprocessing time grows rapidly (super-linearly), the resulting query times are orders of magnitude faster than standard Dijkstra.
+
+\begin{table}[H]
+  \centering
+  \caption{Contraction Hierarchies performance on small graphs. Note the rapid increase in preprocessing time compared to the sub-millisecond query times.}
+  \label{tab:ch_results}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Nodes} & \textbf{Preprocessing Time (s)} & \textbf{Avg Query Time (s)} \\
+    \midrule
+    100            & 0.21                            & 0.00005                     \\
+    500            & 53.71                           & 0.00073                     \\
+    1000           & ?                               & ?                           \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \section{Visualization}
 
 The visualization system uses the Pygame library to provide an interactive, real-time comparison of shortest path algorithms on a customizable grid-based graph.
@@ -510,11 +527,15 @@ Memory usage results further reinforce these conclusions. The Binary Heap consum
 
 Overall, the experiments highlight that while theoretical bounds are informative, real-world performance is shaped by constant factors, implementation language, memory behavior, and workload characteristics. Under Python, the Fibonacci Heap offers the best runtime scalability, the Binary Heap provides predictable and memory-efficient performance, and the Radix Heap, though algorithmically suitable for monotone priority queues, incurs enough overhead to underperform relative to the other two structures.
 
-  [ANALYSIS OF BIDIRECTIONAL AND COMPARISON VS NORMAL]
+\subsection{Bidirectional vs. Unidirectional Search}
+Bidirectional Dijkstra with skewed expansion demonstrated a clear performance advantage over standard Dijkstra for graph sizes up to 1 million nodes, often reducing runtime by 30-50\%. This speedup is attributed to the reduced search space—expanding two smaller circles rather than one large one. However, at 2 million nodes, the trend reversed. The memory consumption of Bidirectional Dijkstra spiked to over 3 GB (compared to $\approx$300 MB for standard Dijkstra), likely causing cache thrashing and memory management overhead that outweighed the algorithmic benefits. This highlights a critical practical limitation: bidirectional search requires maintaining two distinct distance maps and priority queues, effectively doubling the memory footprint and increasing the cost of set operations.
+
+\subsection{Contraction Hierarchies Performance}
+Our experiments with Contraction Hierarchies (CH) revealed the extreme trade-off between preprocessing and query time. While queries on the CH graph were near-instantaneous (often sub-millisecond), the preprocessing phase was computationally expensive. In our Python implementation, preprocessing even small graphs (e.g., 500-1000 nodes) took significantly longer than running a standard Dijkstra search on a much larger graph. This confirms that CH is highly effective for static graphs where the cost of preprocessing can be amortized over millions of queries, but it is ill-suited for dynamic graphs or scenarios where the graph changes frequently. The overhead of the Python interpreter further exacerbates the preprocessing cost, suggesting that a lower-level language like C++ is essential for practical CH implementations on large networks.
 
 \section{Conclusion}
 
- [BRIEF CONCLUSION]
+This study confirms that for general-purpose shortest path queries on large sparse graphs, the Fibonacci Heap provides the best theoretical and practical runtime in Python, despite its complexity. Bidirectional search offers significant speedups but is memory-intensive, making it less suitable in memory-constrained environments at very large scales. Contraction Hierarchies deliver the fastest queries but require substantial preprocessing time, making them ideal for static networks where the graph structure rarely changes.
 
 \section*{GitHub Repository}
 The full implementation (data structures, algorithms, unit tests, visualization, and benchmark plots) is available at:
@@ -523,6 +544,7 @@ The full implementation (data structures, algorithms, unit tests, visualization,
 \section*{Acknowledgements}
 We would like to acknowledge the use of ChatGPT \cite{chatgpt} for assisting with documentation, debugging, and report language refinement.
 
+\newpage
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
 
