@@ -6,13 +6,24 @@ Comprehensive analysis and comparison of **shortest-path** algorithms and priori
 
 ## Project Overview
 
-This project investigates the performance characteristics of **Dijkstra’s shortest path algorithm** using different underlying heap / priority-queue data structures, as well as advanced variants like **Bidirectional Dijkstra** and **Contraction Hierarchies**.
+This project implements and compares several variants of Dijkstra’s shortest path algorithm on large, randomly generated weighted graphs. The goal is to understand how different priority queue designs and search strategies affect runtime, scalability, and memory usage in practical settings.
 
-The primary objectives are:
+We implement Dijkstra’s algorithm using three priority queue structures:
 
-1.  **Heap Comparison**: Implement and compare Binary Heap, Fibonacci Heap, and Radix Heap backends for Dijkstra's algorithm.
-2.  **Algorithmic Variants**: Implement and evaluate Bidirectional Dijkstra (with skewness) and Contraction Hierarchies as speed-up techniques.
-3.  **Benchmarking**: Measure runtime performance on large, randomly generated graphs to validate theoretical complexity differences.
+- **Binary Heap** — the standard baseline with \(O(\log n)\) operations.  
+- **Fibonacci Heap** — an asymptotically optimal structure with amortized \(O(1)\) decrease-key.  
+- **Radix Heap** — a monotone integer heap optimized for Dijkstra’s non-decreasing distance keys.
+
+Beyond standard Dijkstra, we also implement:
+
+- **Bidirectional Dijkstra with skewed expansion**, which searches from both the source and the target to reduce the explored space.  
+- **Contraction Hierarchies (CH)**, a preprocessing-based speed-up technique widely used in road-network routing systems.
+
+All data structures and algorithms are implemented **from scratch in Python**, and evaluated on large Erdős–Rényi (ER) graphs ranging from **10K to 2M nodes**. We measure both **runtime** and **peak memory usage** using controlled experiments.
+
+The repository also includes an **interactive visualization tool** that demonstrates how each algorithm explores the search space in real time on a grid-based graph.
+
+Overall, this project provides a unified, empirical comparison of priority queue designs, search strategies, and hierarchical routing techniques, illustrating how theoretical properties translate to real-world performance in Python.
 
 ## Supplemental Material
 
@@ -20,7 +31,7 @@ The final report with further analysis and implementation details can be found a
 
 A demo of the visualization tool can be found on YouTube at [https://youtu.be/A_zrF0KwM_s](https://youtu.be/A_zrF0KwM_s)
 
-Our presentation can be found at ???
+Our presentation can be found [here](https://docs.google.com/presentation/d/1kqYFEPA8z06mKvAEL735WVigTZRAgPyX3ZdeN_tEBCw/edit?usp=sharing)
 
 ## Repository Structure
 
@@ -29,17 +40,19 @@ shortest_path_comparison/
 ├── src/                               # Source code
 │   ├── algorithms/                    # Algorithm implementations
 │   │   ├── dijkstra.py                # Standard Dijkstra with interchangeable heap backends
-│   │   ├── bidirectional_dijkstra.py  # Bidirectional Dijkstra implementation
 │   │   ├── bidirectional_skewed.py    # Bidirectional Dijkstra with skewness parameter
 │   │   └── contraction_hierarchy.py   # Contraction Hierarchies (Preprocessing + Query)
+│   │
 │   ├── data_structures/               # Priority queue implementations
 │   │   ├── binary_heap.py
 │   │   ├── fibonacci_heap.py
 │   │   └── radix_heap.py
+│   │
 │   ├── utils/
 │   │   ├── graph_generator.py         # Random directed graph generator
-│   │   └── benchmark_dijkstra.py      # Runtime analysis script for Dijkstra's algorithm
+│   │   └── runtime_analysis.py        # Runtime analysis script for Dijkstra and Bidirectional Dijkstra algorithms for all 3 heaps
 │   │   └── benchmark_ch.py            # Runtime analysis script for Contraction Hierarchies
+│   │
 │   └── visualization/                 # Interactive Pygame visualization
 │       ├── main.py                    # Main visualization loop and event handling
 │       ├── grid.py                    # Grid state management and rendering
@@ -64,19 +77,32 @@ shortest_path_comparison/
 └── README.md                           # Project documentation
 ```
 
-## Implementation Status
+## Running the Code
 
-### Core Algorithms & Data Structures
+### 1️⃣ Install Dependencies
 
-- **Heaps**: BinaryHeap, FibonacciHeap, and RadixHeap are fully implemented and tested.
-- **Dijkstra**: Standard implementation supporting all heap backends.
-- **Bidirectional Dijkstra**: Implemented with support for skewness to control search balance.
-- **Contraction Hierarchies**: Implemented with node contraction preprocessing and bidirectional query.
+```bash
+pip install matplotlib tqdm
+```
 
-### Benchmarking & Utilities
+### 2️⃣ Run Unit Tests
 
-- **Graph Generation**: Basic random graph generator included.
-- **Benchmarking**: Initial pipeline established for comparing heap performance.
+**Run all tests at once:**
+```bash
+python -m unittest discover -s unit_tests -p "test_*.py" -v
+```
+
+**Run individual test files (optional):**
+```bash
+python -m unittest unit_tests/test_binary_heap.py -v
+python -m unittest unit_tests/test_dijkstra.py -v
+```
+### 3️⃣ Run the Runtime Benchmark
+
+**Run the benchmark:**
+```bash
+python src.utils.runtime_analysis.py
+```
 
 ## Visualization
 
