@@ -79,13 +79,13 @@ shortest_path_comparison/
 
 ## Running the Code
 
-### 1️⃣ Install Dependencies
+### 1. Install Dependencies
 
 ```bash
-pip install matplotlib tqdm
+python -m pip install -r requirements.txt
 ```
 
-### 2️⃣ Run Unit Tests
+### 2. Run Unit Tests
 
 **Run all tests at once:**
 ```bash
@@ -102,14 +102,12 @@ python -m unittest unit_tests/test_bidirectional_skewed.py -v
 python -m unittest unit_tests/test_contraction_hierarchy.py -v
 python -m unittest unit_tests/test_graph_generator.py -v
 ```
-### 3️⃣ Run the Runtime Benchmark
+### 3️. Run the Runtime Benchmarks
 
 **Run the Dijkstra benchmark:**
 ```bash
 python src/utils/runtime_analysis.py
 ```
-
-### 4️⃣ Run the Runtime Benchmark
 
 **Run the Contraction Hierarchy benchmark:**
 ```bash
@@ -122,14 +120,14 @@ An interactive Pygame-based visualization is included to demonstrate the algorit
 
 _Note:_ the Contraction Hierarchies approach must preprocess the graph before running the query to find the shortest path. In this case, the red nodes will appear very sparse, as the algorithm only visits a small number of nodes to find the shortest path once the preprocessing has determined the shortcuts. The gold lines represent the shortcuts that were used to find the final shortest path.
 
-### 1️⃣ Setup
+### Setup
 
-**Install the visualization dependencies:**
+**Install the visualization dependencies** (if not done already):
    ```bash
    pip install -r requirements.txt
    ```
 
-### 2️⃣ Running
+### Running
 
 **Run the visualization module:**
 
@@ -163,16 +161,16 @@ python -m src.visualization.main
 
 ## Code Documentation
 
-### 🔧 Algorithms (`src/algorithms/`)
+### Algorithms (`src/algorithms/`)
 
-### **`dijkstra.py` — Standard Dijkstra**
+#### **`dijkstra.py` — Standard Dijkstra**
 Implements the classic Dijkstra shortest path algorithm with full support for interchangeable priority queues (Binary, Fibonacci, Radix).  
 Key features:
 - Retrieves the next closest node using the provided heap implementation  
 - Performs `decrease_key` when shorter paths are found  
 - Returns full distance map and parent pointers for path reconstruction  
 
-### **`bidirectional_skewed.py` — Bidirectional Dijkstra (Skewed)**
+#### **`bidirectional_skewed.py` — Bidirectional Dijkstra (Skewed)**
 Runs two simultaneous Dijkstra searches:  
 - one from the source  
 - one from the target  
@@ -183,7 +181,7 @@ Key features:
 - Maintains two heaps, two distance maps, and two visited sets  
 - Terminates when the frontiers meet or exceed the current best path bound  
 
-### **`contraction_hierarchy.py` — Contraction Hierarchies**
+#### **`contraction_hierarchy.py` — Contraction Hierarchies**
 Implements both phases of CH:
 1. **Preprocessing:**  
    - Computes node importance  
@@ -200,7 +198,7 @@ Used for smaller graphs in Python due to preprocessing cost.
 
 ### Data Structures (`src/data_structures/`)
 
-### **`binary_heap.py`**
+#### **`binary_heap.py`**
 A standard array-based min-heap with:
 - `insert`
 - `extract_min`
@@ -209,27 +207,27 @@ A standard array-based min-heap with:
 All core operations run in **O(log n)**.  
 Lightweight, fast in practice, and memory-efficient.
 
-### **`fibonacci_heap.py`**
+#### **`fibonacci_heap.py`**
 Implements a full Fibonacci Heap with:
-- a circular doubly-linked root list  
-- lazy structure updates  
-- cascading cuts for `decrease_key`
+  - A circular doubly-linked root list  
+  - Lazy structure updates  
+  - Cascading cuts for `decrease_key`
 
 Performance:
-- `insert` → **O(1)** amortized  
-- `decrease_key` → **O(1)** amortized  
-- `extract_min` → **O(log n)** amortized  
+  - `insert` -> **O(1)** amortized  
+  - `decrease_key` -> **O(1)** amortized  
+  - `extract_min` -> **O(log n)** amortized  
 
 Closest to optimal theoretical Dijkstra performance.
 
-### **`radix_heap.py`**
+#### **`radix_heap.py`**
 Implements a monotone integer priority queue using exponentially growing bucket ranges.  
 Ideal for Dijkstra because extracted distances never decrease.
 
 Operations:
-- `insert` → **O(1)** amortized  
-- `extract_min` → **O(log C)**  
-- `decrease_key` → handled via lazy deletion  
+  - `insert` -> **O(1)** amortized  
+  - `extract_min` -> **O(log C)**  
+  - `decrease_key` -> Handled via lazy deletion  
 
 Works best when integer edge weights are small or moderate.
 
@@ -237,58 +235,54 @@ Works best when integer edge weights are small or moderate.
 
 ### Utilities (`src/utils/`)
 
-### **`graph_generator.py`**
+#### **`graph_generator.py`**
 Generates large random directed graphs for benchmarking:
-- **Erdős–Rényi (ER)** model  
-- **Barabási–Albert (BA)** model  
+  - **Erdős–Rényi (ER)** model  
+  - **Barabási–Albert (BA)** model  
 
 Outputs adjacency lists with random integer weights.
 
-### **`runtime_analysis.py`**
+#### **`runtime_analysis.py`**
 Runs large-scale runtime and memory benchmarks for:
-- Dijkstra (all heaps)
-- Bidirectional Dijkstra (all heaps)
+  - Dijkstra (all heaps)
+  - Bidirectional Dijkstra (all heaps)
 
-Tests graph sizes from **10K → 2M nodes**, records:
-- wall-clock runtime  
-- peak memory via `tracemalloc`  
+Tests graph sizes from **10K -> 2M nodes**, records:
+  - Wall-clock runtime  
+  - Peak memory via `tracemalloc`  
 
 Produces plots used in the report.
 
-### **`benchmark_ch.py`**
+#### **`benchmark_ch.py`**
 Benchmarks Contraction Hierarchies:
-- preprocessing time  
-- average query time  
+  - Preprocessing time  
+  - Average query time  
 
 Demonstrates CH’s tradeoff between heavy preprocessing and extremely fast queries.
 
 ---
 
-## Unit Tests (`unit_tests/`)
+### Unit Tests (`unit_tests/`)
 Includes correctness tests for:
-- all heaps  
-- Dijkstra, Bidirectional, and CH  
-- graph generator  
+  - All heap variants  
+  - Dijkstra, Bidirectional, and CH  
+  - Graph generator  
 
 Ensures implementations behave correctly under edge cases and random inputs.
-
----
 
 ## License
 
 This project is licensed under the MIT License.
 
----
-
-## 👨‍💻 Authors
+## Authors
 
 **Aarav Gosalia**  
-M. Sc. Computer Science | B.Sc. Data Science, Minor in Economics  
+M.Sc. Computer Science Student | B.Sc. Data Science, Minor in Economics  
 **University of British Columbia – Okanagan**  
 📍 *Kelowna, BC, Canada*  
 🌐 [aaravjgosalia.com](https://aaravjgosaliia.com)
 
 **Riley Eaton**  
-M. Sc. Computer Science <br>
+M.Sc. Computer Science Student | B.Sc. Computer Science <br>
 **University of British Columbia – Okanagan**  
 📍 *Kelowna, BC, Canada*  
