@@ -49,10 +49,10 @@ This report examines and compares three priority queue data structures that can 
 
   \item \textbf{Fibonacci Heap}: A theoretically optimal structure with $O(1)$ amortized \texttt{decrease\_key} and $O(\log n)$ \texttt{extract\_min}, often cited for achieving Dijkstra’s best-known theoretical bound of $O(m + n \log n)$.
 
-  \item \textbf{Radix Heap}: A bucket-based priority queue for monotone integer keys, exploiting the fact that Dijkstra’s distances never decrease. It provides amortized $O(1)$ insert and \texttt{decrease\_key} and $O(\log C)$  \texttt{extract\_min}, where $C$ is the maximum key difference.
+  \item \textbf{Radix Heap}: A bucket-based priority queue for monotone integer keys, exploiting the fact that Dijkstra’s distances never decrease. It provides amortized $O(1)$ insert and \texttt{decrease\_key} and $O(\log C)$ \texttt{extract\_min}, where $C$ is the maximum key difference.
 \end{enumerate}
 
-In addition to these data structures, this project will also extend the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target.
+In addition to these data structures, this project extends the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target.
 
 Finally, we implement \textbf{Contraction Hierarchies}, a speed-up technique that relies on preprocessing the graph to create a hierarchy of nodes, allowing for extremely fast queries by ignoring unimportant nodes during the search.
 
@@ -83,7 +83,7 @@ This array-based representation eliminates the need for pointers, making Binary 
   \label{fig:binaryheap}
 \end{figure}
 
-\subsubsection*{Insertion}
+\subsubsection*{\texttt{insert}}
 When a new element is inserted, it is first placed at the end of the array (to maintain the complete tree property). Then, it is repeatedly compared with its parent and swapped upward until the heap property is restored. This upward movement is known as a \textbf{sift-up} or \textbf{bubble-up}.
 Since each level in the tree can contain twice as many nodes as the previous one, and the heap’s height is $\log_2 n$, the insertion process requires at most $\log n$ swaps.
 \[
@@ -125,7 +125,7 @@ Each tree in a Fibonacci Heap obeys the \emph{min-heap property}: the key of eve
   \label{fig:fibonacciheap}
 \end{figure}
 
-\subsubsection*{Insertion}
+\subsubsection*{\texttt{insert}}
 To insert a new key, a single-node tree is created and added directly to the root list. The minimum pointer is updated if the new key is smaller than the current minimum. Since no tree restructuring or traversal is required, the insertion operation runs in \textbf{constant time}.
 \[
   T_{\text{insert}} = O(1)
@@ -193,7 +193,7 @@ The Radix Heap was introduced by Ahuja, Mehlhorn, Orlin, and Tarjan~\cite{ahuja1
   \label{fig:radixheap}
 \end{figure}
 
-\subsubsection*{Insertion}
+\subsubsection*{\texttt{insert}}
 To insert a key, the heap identifies the bucket whose range $[b_i, b_{i+1})$ contains the key and appends the element to that bucket. Because bucket ranges grow exponentially and keys only increase relative to the last extracted minimum, each element moves to lower-index buckets only a limited number of times. Amortized over all operations, insertion runs in constant time:
 \[
   T_{\text{insert}} = O(1) \ \text{amortized}.
@@ -370,7 +370,7 @@ The main experimental dataset consists of ER graphs of the following sizes:
 Larger ER graphs beyond 2 million nodes were not tested due to hardware constraints, specifically, the system’s 16GB memory capacity and the significant runtime required for dense graphs at that scale.
 
 \section{Results}
-All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both runtime and peak memory usage were recorded for each heap implementation using wall-clock time and Python’s tracemalloc module. For graphs with up to 500,000 nodes, each configuration (algorithm–heap pair) was executed three times, and we report the average runtime and peak memory to reduce noise from background processes. For larger graphs with 1M and 2M nodes, each configuration was run once due to the substantial computation time and memory required.
+All experiments were executed on a MacBook Pro M2 with 16 GB of unified memory. Both runtime and peak memory usage were recorded for each heap implementation using wall-clock time and Python’s \texttt{tracemalloc} module. For graphs with up to 500,000 nodes, each configuration (algorithm–heap pair) was executed three times, and we report the average runtime and peak memory to reduce noise from background processes. For larger graphs with 1M and 2M nodes, each configuration was run once due to the substantial computation time and memory required.
 
 \begin{table}[H]
   \centering
@@ -525,7 +525,7 @@ The visualization system uses the Pygame library to provide an interactive, real
 
 Each algorithm is implemented as a Python generator that yields intermediate states at each iteration. The grid is represented as an $N \times N$ matrix of nodes, which is converted to an adjacency list for algorithm execution. During visualization, nodes are color-coded to reflect their state: orange for the start node, turquoise for the end, black for obstacles, red for visited nodes, green for frontier nodes, and purple for the final shortest path. This allows users to observe how each algorithm explores the search space differently—Dijkstra expands uniformly from the source, Bidirectional Dijkstra searches from both endpoints simultaneously, and Contraction Hierarchies shows very little exploration due to its preprocessing. For Contraction Hierarchies specifically, the visualization includes gold lines connecting nodes with shortcuts, demonstrating how the algorithm "jumps" across the graph using preprocessed edges before unpacking them into the complete path.
 
-To provide accurate performance comparisons without visualization overhead, each algorithm runs twice: first non-visually to capture timing metrics, then as a generator for step-by-step rendering. The system supports command-line configuration of grid size and heap type (binary, Fibonacci, or radix), allowing users to easily compare different configurations. Users interact using mouse clicks to place walls and start/end nodes, with keyboard controls for algorithm selection and execution. Preset mazes and random wall generation allow for repeatable and rapid testing, respectively.
+To provide accurate performance comparisons without visualization overhead, each algorithm runs twice: first non-visually to capture timing metrics, then as a generator for step-by-step rendering. The system supports command-line configuration of grid size and heap type (binary, Fibonacci, or radix), allowing users to easily compare different configurations. Users interact by clicking the mouse to place walls and start/end nodes, with keyboard controls for algorithm selection and execution. Preset mazes and random wall generation allow for repeatable and rapid testing, respectively.
 
 This visualization tool serves as both an educational resource for understanding algorithmic behavior and a practical benchmarking environment to analyze performance for different graph structures.
 
