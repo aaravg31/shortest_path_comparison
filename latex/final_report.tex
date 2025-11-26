@@ -29,27 +29,27 @@
   \country{Canada}}
 
 \begin{abstract}
-  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap. We also focus on a  Dijkstra variant which searches bidirectionally, and can make use of skewed frontiers. Finally, we implement Contraction Hierarchies (CH), a hierarchical speed-up technique. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structures. Theoretical time and space bounds are contrasted with empirical behaviour, using runtime and peak memory usage as the primary metrics.
+  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap. We also examine a bidirectional Dijkstra variant that employs skewed search frontiers. Finally, we implement Contraction Hierarchies (CH), a hierarchical speed-up technique. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structures. Theoretical time and space bounds are contrasted with empirical behaviour, using runtime and peak memory usage as the primary metrics.
 \end{abstract}
 
-\keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Contraction Heirachy, Graph Algorithms, Priority Queues}
+\keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Contraction Hierarchy, Graph Algorithms, Priority Queues}
 
 \maketitle
 
 \section{Introduction}
 
-Dijkstra’s shortest path algorithm remains one of the most influential and widely used algorithms in graph theory, powering applications in transportation networks, communication systems, robotics, and large-scale optimization. Although the algorithmic structure of Dijkstra’s method is conceptually simple, its real-world performance is deeply dependent on the efficiency of the priority queue used to repeatedly extract the next closest vertex and perform decrease\_key operations.
+Dijkstra’s shortest path algorithm remains one of the most influential and widely used algorithms in graph theory, powering applications in transportation networks, communication systems, robotics, and large-scale optimization. Although the algorithmic structure of Dijkstra’s method is conceptually simple, its real-world performance is deeply dependent on the efficiency of the priority queue used to repeatedly extract the next closest vertex and perform \texttt{decrease\_key} operations.
 
 \vspace{1em}
 
 This report examines and compares three priority queue data structures that can be used to optimize Dijkstra’s algorithm:
 
 \begin{enumerate}
-  \item \textbf{Binary Heap} – A widely used baseline implementation offering $O(\log n)$ extract\_min and decrease\_key, forming the standard version taught in most courses.
+  \item \textbf{Binary Heap}: A widely used baseline implementation offering $O(\log n)$ \texttt{extract\_min} and \texttt{decrease\_key}, forming the standard version taught in most courses.
 
-  \item \textbf{Fibonacci Heap} – A theoretically optimal structure with $O(1)$ amortized decrease\_key and $O(\log n)$ extract\_min, often cited for achieving Dijkstra’s best-known theoretical bound of $O(m + n \log n)$.
+  \item \textbf{Fibonacci Heap}: A theoretically optimal structure with $O(1)$ amortized \texttt{decrease\_key} and $O(\log n)$ \texttt{extract\_min}, often cited for achieving Dijkstra’s best-known theoretical bound of $O(m + n \log n)$.
 
-  \item \textbf{Radix Heap} – A bucket-based priority queue for monotone integer keys, exploiting the fact that Dijkstra’s distances never decrease. It provides amortized $O(1)$ insert and decrease\_key and $O(\log C)$  extract\_min, where C is the maximum key difference.
+  \item \textbf{Radix Heap}: A bucket-based priority queue for monotone integer keys, exploiting the fact that Dijkstra’s distances never decrease. It provides amortized $O(1)$ insert and \texttt{decrease\_key} and $O(\log C)$  \texttt{extract\_min}, where $C$ is the maximum key difference.
 \end{enumerate}
 
 In addition to these data structures, this project will also extend the analysis to include \textbf{Bidirectional Dijkstra with Skewed Expansion}, an optimization technique that explores the graph simultaneously from the source and the target.
@@ -90,14 +90,14 @@ Since each level in the tree can contain twice as many nodes as the previous one
   T_{\text{insert}} = O(\log n)
 \]
 
-\subsubsection*{Extract\_Min}
+\subsubsection*{\texttt{extract\_min}}
 Extracting the minimum element involves removing the root (the smallest key). To maintain completeness, the last element in the array is moved to the root position. Then, it is repeatedly swapped with the smaller of its two children until the heap property is restored. This process is called \textbf{sift-down} or \textbf{heapify}.
 Each swap moves the element one level deeper, and the tree height is $\log n$, so the operation takes logarithmic time.
 \[
   T_{\text{extract\_min}} = O(\log n)
 \]
 
-\subsubsection*{decrease\_Key}
+\subsubsection*{\texttt{decrease\_key}}
 The \texttt{decrease\_key} operation lowers the key value of an element in the heap. Because the key becomes smaller, the node may violate the heap property with respect to its parent. Therefore, the element is moved upward using the same \textbf{sift-up} procedure as insertion. In the worst case, it moves up to the root, resulting in logarithmic time.
 \[
   T_{\text{decrease\_key}} = O(\log n)
@@ -131,7 +131,7 @@ To insert a new key, a single-node tree is created and added directly to the roo
   T_{\text{insert}} = O(1)
 \]
 
-\subsubsection*{Extract\_Min}
+\subsubsection*{\texttt{extract\_min}}
 The \texttt{extract\_min} operation removes the node pointed to by the minimum pointer. Its children are then added to the root list, effectively promoting them to become separate trees. To restore the heap’s structure, trees in the root list with the same degree (number of children) are \textbf{consolidated} by linking one tree as a child of another with a smaller key.
 
 \begin{figure}[H]
@@ -143,13 +143,13 @@ The \texttt{extract\_min} operation removes the node pointed to by the minimum p
   \label{fig:fibonacciheap_extractmin}
 \end{figure}
 
-The consolidation process ensures that the number of trees in the heap is logarithmic with respect to $n$, the total number of nodes. Therefore, while individual link operations are constant time, the entire extract\_min runs in amortized logarithmic time.
+The consolidation process ensures that the number of trees in the heap is logarithmic with respect to $n$, the total number of nodes. Therefore, while individual link operations are constant time, the entire \texttt{extract\_min} runs in amortized logarithmic time.
 \[
   T_{\text{extract\_min}} = O(\log n)
 \]
 
-\subsubsection*{decrease\_Key}
-The decrease\_key operation reduces the key value of a node. If the new key violates the heap property (i.e., becomes smaller than its parent), the node is \textbf{cut} from its parent and added to the root list. To maintain balance, if a parent loses more than one child, it is also cut, a process known as a \textbf{cascading cut}. Since cuts involve constant-time pointer manipulations, the amortized time for this operation remains constant.
+\subsubsection*{\texttt{decrease\_key}}
+The \texttt{decrease\_key} operation reduces the key value of a node. If the new key violates the heap property (i.e., becomes smaller than its parent), the node is \textbf{cut} from its parent and added to the root list. To maintain balance, if a parent loses more than one child, it is also cut, a process known as a \textbf{cascading cut}. Since cuts involve constant-time pointer manipulations, the amortized time for this operation remains constant.
 \[
   T_{\text{decrease\_key}} = O(1)
 \]
@@ -199,15 +199,15 @@ To insert a key, the heap identifies the bucket whose range $[b_i, b_{i+1})$ con
   T_{\text{insert}} = O(1) \ \text{amortized}.
 \]
 
-\subsubsection*{Extract\_Min}
-The minimum key is always located in the first bucket. If this bucket is empty, the heap performs a \emph{refill} step by locating the next non-empty bucket, determining the minimum key within it, updating the bucket boundaries, and redistributing its contents into earlier buckets. Although this redistribution may involve scanning an entire bucket, each element participates in only a small number of such redistributions. The amortized time for extract\_min is therefore logarithmic in the maximum key difference:
+\subsubsection*{\texttt{extract\_min}}
+The minimum key is always located in the first bucket. If this bucket is empty, the heap performs a \emph{refill} step by locating the next non-empty bucket, determining the minimum key within it, updating the bucket boundaries, and redistributing its contents into earlier buckets. Although this redistribution may involve scanning an entire bucket, each element participates in only a small number of such redistributions. The amortized time for \texttt{extract\_min} is therefore logarithmic in the maximum key difference:
 \[
   T_{\text{extract\_min}} = O(\log C),
 \]
 where $C$ is the maximum difference between successive extracted keys (often bounded by the maximum edge weight).
 
-\subsubsection*{decrease\_Key}
-The \texttt{decrease\_key} operation inserts a new, smaller key for an existing element while marking the old entry as stale. Since new keys can only move to buckets of lower or equal index, and each element shifts buckets only a limited number of times, the amortized cost of decrease\_key matches that of insertion:
+\subsubsection*{\texttt{decrease\_key}}
+The \texttt{decrease\_key} operation inserts a new, smaller key for an existing element while marking the old entry as stale. Since new keys can only move to buckets of lower or equal index, and each element shifts buckets only a limited number of times, the amortized cost of \texttt{decrease\_key} matches that of insertion:
 \[
   T_{\text{decrease\_key}} = O(1) \ \text{amortized}.
 \]
@@ -304,7 +304,7 @@ This modular design allows the same Dijkstra function to operate seamlessly with
 The \texttt{BidirectionalDijkstra} class manages two separate priority queues, \texttt{f\_heap} and \texttt{b\_heap}, with corresponding distance dictionaries \texttt{f\_dist} and \texttt{b\_dist}.
 To support skewed expansion, the algorithm dynamically selects which frontier to expand based on the skew parameter $\sigma$, as described in section \ref{sec:skewed}. The decision logic is implemented as:
 \[
-  \text{len}(Q_f) \times (1 - \sigma) \le \text{len}(Q_b) \times \sigma
+  |Q_f| \times (1 - \sigma) \le |Q_b| \times \sigma
 \]
 This allows the search to prioritize the smaller frontier or bias towards one direction. The search terminates when the sum of the minimum keys from both heaps exceeds the shortest path found so far ($\mu$):
 \[
@@ -478,11 +478,11 @@ The empirical results reveal clear performance differences among the Binary Heap
 
 \vspace{1em}
 
-Across all graph sizes, the Fibonacci Heap consistently delivered the fastest runtimes, particularly on larger graphs where decrease\_key operations dominate computation. This matches theoretical expectations: with amortized \(O(1)\) decrease\_key and \(O(\log n)\) extract\_min, Fibonacci Heaps become increasingly advantageous as the edge count grows.
+Across all graph sizes, the Fibonacci Heap consistently delivered the fastest runtimes, particularly on larger graphs where \texttt{decrease\_key} operations dominate computation. This matches theoretical expectations: with amortized \(O(1)\) \texttt{decrease\_key} and \(O(\log n)\) \texttt{extract\_min}, Fibonacci Heaps become increasingly advantageous as the edge count grows.
 
 \vspace{1em}
 
-The Binary Heap showed predictable and stable performance, with runtimes growing steadily with graph size. Its simple contiguous array structure, low constant factors, and cache-friendly memory layout make it competitive at small and moderate scales. Nevertheless, as the graph size reached the upper bounds of the experiment (1--2M nodes), its \(O(\log n)\) decrease\_key penalties accumulated and caused the runtime to grow faster than that of the Fibonacci Heap. Despite this, Binary Heaps remained significantly more memory-efficient due to requiring only one integer and one pointer per entry.
+The Binary Heap showed predictable and stable performance, with runtimes growing steadily with graph size. Its simple contiguous array structure, low constant factors, and cache-friendly memory layout make it competitive at small and moderate scales. Nevertheless, as the graph size reached the upper bounds of the experiment (1--2M nodes), its \(O(\log n)\) \texttt{decrease\_key} penalties accumulated and caused the runtime to grow faster than that of the Fibonacci Heap. Despite this, Binary Heaps remained significantly more memory-efficient due to requiring only one integer and one pointer per entry.
 
 \vspace{1em}
 
@@ -513,7 +513,7 @@ Our experiments with Contraction Hierarchies (CH) revealed the extreme trade-off
 
 \section{Conclusion}
 
-This study provides a comprehensive comparison of priority queue structures and search strategies for Dijkstra’s algorithm on large sparse graphs. Across all experiments, the Fibonacci Heap delivered the strongest runtime performance in Python, particularly at scale, due to its amortized $O(1)$ decrease\_key and efficient consolidation. The Binary Heap remained a robust and memory-efficient baseline, offering predictable behavior and outperforming the other heaps in terms of space usage, though its $O(\log n)$ updates limited its scalability on the largest graphs.
+This study provides a comprehensive comparison of priority queue structures and search strategies for Dijkstra’s algorithm on large sparse graphs. Across all experiments, the Fibonacci Heap delivered the strongest runtime performance in Python, particularly at scale, due to its amortized $O(1)$ \texttt{decrease\_key} and efficient consolidation. The Binary Heap remained a robust and memory-efficient baseline, offering predictable behavior and outperforming the other heaps in terms of space usage, though its $O(\log n)$ updates limited its scalability on the largest graphs.
 
 The Radix Heap, while theoretically appealing for monotone integer keys, consistently underperformed in Python due to bucket redistribution overhead and high memory consumption—factors that overshadowed its amortized constant-time operations. Bidirectional Dijkstra provided notable runtime improvements on small and medium-sized graphs but became impractical at very large scales due to its doubled memory footprint. Finally, Contraction Hierarchies achieved exceptional query performance but required prohibitively expensive preprocessing, making them suitable only for static networks where preprocessing can be amortized.
 
