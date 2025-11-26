@@ -8,6 +8,5 @@ flake8>=6.0.0
 mypy>=1.5.0
 
 # (Optional) For  visualizations
-# matplotlib>=3.7.0
-# networkx>=3.1
+matplotlib>=3.7.0
 pygame>=2.5.0
