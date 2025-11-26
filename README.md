@@ -31,7 +31,7 @@ The final report with further analysis and implementation details can be found a
 
 A demo of the visualization tool can be found on YouTube at [https://youtu.be/A_zrF0KwM_s](https://youtu.be/A_zrF0KwM_s)
 
-Our presentation can be found [here](https://docs.google.com/presentation/d/1kqYFEPA8z06mKvAEL735WVigTZRAgPyX3ZdeN_tEBCw/edit?usp=sharing)
+Our presentation can be accessed on Google Slides, [here](https://docs.google.com/presentation/d/1kqYFEPA8z06mKvAEL735WVigTZRAgPyX3ZdeN_tEBCw/edit?usp=sharing)
 
 ## Repository Structure
 
