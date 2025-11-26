@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title{Shortest Path Algorithm Comparisons: Dijkstra with Advanced Heaps and Bidirectional Skewness}
+\title{Optimizing Dijkstra: A Comparative Analysis of Priority Queues, Bidirectional Search, and Contraction Hierarchies}
 
 \author{Aarav Gosalia}
 \affiliation{%
@@ -29,7 +29,7 @@
   \country{Canada}}
 
 \begin{abstract}
-  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap, and also study a bidirectional Dijkstra variant with skewed search frontiers. We also introduce Contraction Hierarchies (CH), a hierarchical speed-up technique. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structure. Theoretical time and space bounds are contrasted with empirical behaviour, using both runtime and peak memory usage as primary metrics.
+  This report presents a comparative analysis of several variants of Dijkstra’s shortest path algorithm, focusing on both priority queue design and search strategy. We implement Dijkstra’s algorithm with three different heap-based priority queues: Binary Heap, Radix Heap, and Fibonacci Heap. We also focus on a  Dijkstra variant which searches bidirectionally, and can make use of skewed frontiers. Finally, we implement Contraction Hierarchies (CH), a hierarchical speed-up technique. All data structures are implemented from scratch in Python and evaluated on large randomly generated weighted graphs designed to approximate real-world network structures. Theoretical time and space bounds are contrasted with empirical behaviour, using runtime and peak memory usage as the primary metrics.
 \end{abstract}
 
 \keywords{Dijkstra’s Algorithm, Binary Heap, Radix Heap, Fibonacci Heap, Bidirectional Skewness, Contraction Heirachy, Graph Algorithms, Priority Queues}
@@ -57,7 +57,7 @@ In addition to these data structures, this project will also extend the analysis
 Finally, we implement \textbf{Contraction Hierarchies}, a speed-up technique that relies on preprocessing the graph to create a hierarchy of nodes, allowing for extremely fast queries by ignoring unimportant nodes during the search.
 
 \vspace{1em}
-Overall, the goal of this project is to provide both a theoretical and empirical comparison of these structures and Dijkstra implementations, evaluating their runtime behavior, scalability, and memory characteristics when applied to large synthetic graphs.
+Overall, this project aims to provide both a theoretical and empirical comparison of these data structures and algorithms, evaluating their runtime, scalability, and memory efficiency on large synthetic graphs.
 
 \section{Background and Theory}
 
@@ -533,8 +533,8 @@ A demo of the visualization tool can be found at \url{https://youtu.be/A_zrF0KwM
 
 \section{Team Contributions}
 \begin{itemize}
-    \item \textbf{Aarav Gosalia:} Implemented the data structures, Dijkstra, and other utility tools (graph generator, runtime analysis).
-    \item \textbf{Riley Eaton:} Implemented Bidirectional Dijkstra, Contraction Hierarchies, and developed the visualization application.
+  \item \textbf{Aarav Gosalia:} Implemented the data structures, Dijkstra, and other utility tools (graph generator, runtime analysis).
+  \item \textbf{Riley Eaton:} Implemented Bidirectional Dijkstra, Contraction Hierarchies, and developed the visualization application.
 \end{itemize}
 
 Both team members contributed to writing the report, preparing slides, and reviewing each other’s sections.
